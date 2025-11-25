@@ -63,9 +63,6 @@ fun IU(miViewModel: MyViewModel) {
             }
         }
         // creao boton Start
-        Text("Has apretado el botón ${cuenta} veces")
-        Text(text="N veces de correcto: ${cuentaCorrecto}" , style = TextStyle(color = Color.Green))
-        Text(text="N veces de Incorrecto: ${cuentaIncorrecto}" , style = TextStyle(color = Color.Red))
 
         Boton_Start(miViewModel, Colores.CLASE_START)
     }
