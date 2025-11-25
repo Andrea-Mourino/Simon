@@ -6,6 +6,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
+import android.media.AudioManager
+import android.media.ToneGenerator
 class MyViewModel(): ViewModel() {
 
     private val TAG_LOG = "miDebug"
@@ -21,6 +23,7 @@ class MyViewModel(): ViewModel() {
 
     var _colorPulsado: MutableStateFlow<Int> = MutableStateFlow(-1)
 
+    val tone = ToneGenerator(AudioManager.STREAM_MUSIC, 100)
 
 
     init {
@@ -39,6 +42,7 @@ class MyViewModel(): ViewModel() {
              if (numeroAdivinar == Datos.secuencia[_nSecuenciaActual.value]) {
                  Log.d(TAG_LOG, "adivinaste - Estado: ${estadoActual.value}")
                  viewModelScope.launch {
+                     hacerSonido(_colorPulsado.value)
                      botonPulsado()
                  }
              } else {
@@ -57,6 +61,7 @@ class MyViewModel(): ViewModel() {
         _colorActivo.value = -1
         delay(200)
         for (color in Datos.secuencia) {
+            hacerSonido(color)
             _colorActivo.value = color
             delay(500)
             _colorActivo.value = -1
@@ -65,6 +70,37 @@ class MyViewModel(): ViewModel() {
         estadoActual.value = Estados.ADIVINANDO
         Log.d(TAG_LOG, "Tu turno - Estado: ${estadoActual.value}")
     }
+
+    fun hacerSonido(color: Int){
+        when (color) {
+            0 -> playDo()
+            1 -> playMi()
+            2 -> playSol()
+            3 -> playDoGrave()
+            else -> Log.d(TAG_LOG, "Error, color no esta dentro del indice")
+        }
+    }
+
+    fun playDo() {
+        Log.d(TAG_LOG, "Pulsado Do agudo")
+        tone.startTone(ToneGenerator.TONE_DTMF_1, 200)
+    }
+
+    fun playMi() {
+        Log.d(TAG_LOG, "Pulsado Mi")
+        tone.startTone(ToneGenerator.TONE_DTMF_3, 200)
+    }
+
+    fun playSol() {
+        Log.d(TAG_LOG, "Pulsado Sol")
+        tone.startTone(ToneGenerator.TONE_DTMF_7, 200)
+    }
+
+    fun playDoGrave() {
+        Log.d(TAG_LOG, "Pulsado Do grave")
+        tone.startTone(ToneGenerator.TONE_DTMF_9, 200)
+    }
+
     fun reiniciarJuego(){
         Log.d(TAG_LOG, "fallaste,has perdido, reiniciando - Estado: ${estadoActual.value}")
         Log.d(TAG_LOG, "nivel alcanzado: ${Datos.ronda}")
