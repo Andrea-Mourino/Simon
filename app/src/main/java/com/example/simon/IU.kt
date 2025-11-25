@@ -18,6 +18,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.graphics.Color
 
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.graphics.Brush
+import kotlinx.coroutines.delay
 
 /**
  * Interfaz de usuario
@@ -31,16 +37,16 @@ fun IU(miViewModel: MyViewModel) {
 
     // botones en horizontal
     Box(
-        modifier = Modifier.fillMaxSize().background(Color(0xFF6A0DAD)), // Fondo morado simple
+        modifier = Modifier.fillMaxSize().background(brush = Brush.verticalGradient(colors = listOf(Color(0xFF6A0DAD), Color(0xFF9C27B0))
+                )
+            ),
         contentAlignment = Alignment.Center
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                     Boton(miViewModel, Colores.CLASE_ROJO)
                     Boton(miViewModel, Colores.CLASE_VERDE)
