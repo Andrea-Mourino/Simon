@@ -17,6 +17,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.graphics.Color
 
+import androidx.compose.foundation.shape.RoundedCornerShape
+
 /**
  * Interfaz de usuario
  * Modificado desde Code
@@ -61,6 +63,8 @@ fun Boton(miViewModel: MyViewModel, enum_color: Colores) {
     Button(
         enabled = _activo,
         onClick = { miViewModel.comprobar(enum_color.ordinal) },
+        shape = RoundedCornerShape(16.dp),
+        elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
         colors = ButtonDefaults.buttonColors(enum_color.color),
         modifier = Modifier.size(100.dp, 60.dp)
     ) {
@@ -78,6 +82,8 @@ fun Boton_Start(miViewModel: MyViewModel, enum_color: Colores) {
             miViewModel.sumarBoton()
         },
         colors = ButtonDefaults.buttonColors(enum_color.color),
+        shape = RoundedCornerShape(20.dp),
+        elevation = ButtonDefaults.buttonElevation(defaultElevation = 10.dp),
         modifier = Modifier.size(140.dp, 70.dp)
     ) {
         Text(text = enum_color.txt.uppercase(), color = Color.White)
