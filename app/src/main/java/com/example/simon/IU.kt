@@ -24,6 +24,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.graphics.Color
+
 
 /**
  * Interfaz de usuario
@@ -34,7 +37,7 @@ import androidx.compose.runtime.collectAsState
 fun IU(miViewModel: MyViewModel) {
     // para que sea mas facil la etiqueta del log
     // val TAG_LOG = "miDebug"
-
+    val ronda by miViewModel._ronda.collectAsState()
     // botones en horizontal
     Column(
         modifier= Modifier.fillMaxWidth().fillMaxHeight().padding(20.dp),
@@ -57,6 +60,7 @@ fun IU(miViewModel: MyViewModel) {
                 Boton(miViewModel, Colores.CLASE_AMARILLO)
             }
         }
+        Text(text="Ronda Nº: ${ronda}" , style = TextStyle(color = Color.Green))
         // creao boton Start
         Boton_Start(miViewModel, Colores.CLASE_START)
     }
@@ -127,7 +131,7 @@ fun Boton_Start(miViewModel: MyViewModel, enum_color: Colores) {
         colors = ButtonDefaults.buttonColors(_color),
         onClick = {
             Log.d(TAG_LOG, "Dentro del Start - Estado: ${miViewModel.estadoActual.value.name}")
-            miViewModel.generarSecuencia()
+            miViewModel.generarNNuevo()
         },
         modifier = Modifier
             .size((100).dp, (40).dp)
