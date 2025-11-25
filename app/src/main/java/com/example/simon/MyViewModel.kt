@@ -29,7 +29,7 @@ class MyViewModel(): ViewModel() {
     }
 
     /**
-     * crear entero random
+     * crear entero randomm
      */
     fun generarSecuencia() {
         // cambiamos estado, por lo tanto la IU se actualiza
