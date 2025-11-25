@@ -32,10 +32,7 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun IU(miViewModel: MyViewModel) {
-    // para que sea mas facil la etiqueta del log
-    // val TAG_LOG = "miDebug"
 
-    // botones en horizontal
     Box(
         modifier = Modifier.fillMaxSize().background(brush = Brush.verticalGradient(colors = listOf(Color(0xFF6A0DAD), Color(0xFF9C27B0))
                 )
