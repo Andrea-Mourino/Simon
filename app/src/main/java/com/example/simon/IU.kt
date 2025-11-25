@@ -36,9 +36,6 @@ import androidx.compose.ui.text.TextStyle
 fun IU(miViewModel: MyViewModel) {
     // para que sea mas facil la etiqueta del log
     // val TAG_LOG = "miDebug"
-    val cuenta by miViewModel.numeroSuma.collectAsState()
-    val cuentaCorrecto by miViewModel.numeroCorrecto.collectAsState()
-    val cuentaIncorrecto by miViewModel.numeroIncorrecto.collectAsState()
 
     // botones en horizontal
     Column(
