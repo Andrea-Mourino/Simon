@@ -75,17 +75,23 @@ fun Boton(miViewModel: MyViewModel, enum_color: Colores) {
     // variable para el estado del boton
     var _activo = miViewModel.estadoActual.collectAsState().value.boton_activo
     var _secuencia = miViewModel.estadoActual.collectAsState().value.boton_secuencia
+    var _pulsado = miViewModel.estadoActual.collectAsState().value.boton_pulsado
 
     val colorActivo by miViewModel._colorActivo.collectAsState()
-    val botonColor = if (colorActivo != enum_color.ordinal) enum_color.color_suave else enum_color.color
+    val botonColor = if (colorActivo == enum_color.ordinal) enum_color.color_brillante else enum_color.color_suave
+
+    val colorPulsado by miViewModel._colorPulsado.collectAsState()
+    val botonColorPulsado = if (colorPulsado == enum_color.ordinal) enum_color.color_brillante else enum_color.color
+
     // separador entre botones
     Spacer(modifier = Modifier.size(10.dp))
 
     Button(
         enabled = _activo,
         // utilizamos el color del enum
-        colors =  if (!_secuencia){ButtonDefaults.buttonColors(enum_color.color)
-                  }else{ButtonDefaults.buttonColors(botonColor)},
+        colors =  if (_secuencia){ButtonDefaults.buttonColors(botonColor)
+                  }else if(_pulsado){ ButtonDefaults.buttonColors(botonColorPulsado)
+                }else{ButtonDefaults.buttonColors(enum_color.color)},
         onClick = {
             if (!_secuencia) {
                 Log.d(TAG_LOG, "Dentro del boton: ${enum_color.ordinal}")

@@ -19,6 +19,8 @@ class MyViewModel(): ViewModel() {
     // Color que se está mostrando en este momento (por defecto -1 significa ninguno)
     var _colorActivo: MutableStateFlow<Int> = MutableStateFlow(-1)
 
+    var _colorPulsado: MutableStateFlow<Int> = MutableStateFlow(-1)
+
 
 
     init {
@@ -33,13 +35,22 @@ class MyViewModel(): ViewModel() {
     }
 
     fun comprobar(numeroAdivinar: Int) {
+        _colorPulsado.value = numeroAdivinar
              if (numeroAdivinar == Datos.secuencia[_nSecuenciaActual.value]) {
                  Log.d(TAG_LOG, "adivinaste - Estado: ${estadoActual.value}")
-                 setnSecuencia()
+                 viewModelScope.launch {
+                     botonPulsado()
+                 }
              } else {
                  estadoActual.value = Estados.REINICIANDO
                  reiniciarJuego()
             }
+    }
+
+    suspend fun botonPulsado(){
+        estadoActual.value = Estados.PULSADO
+        delay(200)
+        setnSecuencia()
     }
 
     suspend fun mostrarColores(){
@@ -94,6 +105,7 @@ class MyViewModel(): ViewModel() {
             _nSecuenciaActual.value = 0
             setRonda()
         } else {
+            estadoActual.value = Estados.ADIVINANDO
             Log.d(TAG_LOG, "dime el siguiente numero - Estado: ${estadoActual.value}")
             _nSecuenciaActual.value ++
         }
