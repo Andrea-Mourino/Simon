@@ -46,6 +46,7 @@ class MyViewModel(): ViewModel() {
                      botonPulsado()
                  }
              } else {
+                 hacerSonido(-1)
                  estadoActual.value = Estados.REINICIANDO
                  reiniciarJuego()
             }
@@ -61,8 +62,8 @@ class MyViewModel(): ViewModel() {
         _colorActivo.value = -1
         delay(200)
         for (color in Datos.secuencia) {
-            hacerSonido(color)
             _colorActivo.value = color
+            hacerSonido(_colorActivo.value)
             delay(500)
             _colorActivo.value = -1
             delay(200)
@@ -73,33 +74,39 @@ class MyViewModel(): ViewModel() {
 
     fun hacerSonido(color: Int){
         when (color) {
-            0 -> playDo()
-            1 -> playMi()
-            2 -> playSol()
-            3 -> playDoGrave()
-            else -> Log.d(TAG_LOG, "Error, color no esta dentro del indice")
+            0 -> sonidoDo()
+            1 -> sonidoMi()
+            2 -> sonidoSol()
+            3 -> sonidoDoGrave()
+            else -> sonidoError()
         }
     }
 
-    fun playDo() {
+    fun sonidoDo() {
         Log.d(TAG_LOG, "Pulsado Do agudo")
         tone.startTone(ToneGenerator.TONE_DTMF_1, 200)
     }
 
-    fun playMi() {
+    fun sonidoMi() {
         Log.d(TAG_LOG, "Pulsado Mi")
         tone.startTone(ToneGenerator.TONE_DTMF_3, 200)
     }
 
-    fun playSol() {
+    fun sonidoSol() {
         Log.d(TAG_LOG, "Pulsado Sol")
         tone.startTone(ToneGenerator.TONE_DTMF_7, 200)
     }
 
-    fun playDoGrave() {
+    fun sonidoDoGrave() {
         Log.d(TAG_LOG, "Pulsado Do grave")
         tone.startTone(ToneGenerator.TONE_DTMF_9, 200)
     }
+
+    fun sonidoError() {
+        Log.d(TAG_LOG, "Sonido de error")
+        tone.startTone(ToneGenerator.TONE_CDMA_CALL_SIGNAL_ISDN_INTERGROUP, 300)
+    }
+
 
     fun reiniciarJuego(){
         Log.d(TAG_LOG, "fallaste,has perdido, reiniciando - Estado: ${estadoActual.value}")
@@ -108,6 +115,7 @@ class MyViewModel(): ViewModel() {
         _listaSecuencia.value = emptyList()
         _nSecuenciaActual.value = 0
         _ronda.value = 0
+        Datos.ronda = _ronda.value
         estadoActual.value = Estados.INICIO
     }
 
