@@ -17,9 +17,6 @@ class MyViewModel(): ViewModel() {
     // patron de diseño observer
     val estadoActual = MutableStateFlow(Estados.INICIO)
 
-    var numeroSuma : MutableStateFlow<Int> = MutableStateFlow(0)
-    var numeroCorrecto : MutableStateFlow<Int> = MutableStateFlow(0)
-    var numeroIncorrecto : MutableStateFlow<Int> = MutableStateFlow(0)
 
     // este va a ser nuestra lista para la secuencia random
     // usamos mutable, ya que la queremos modificar
@@ -34,37 +31,21 @@ class MyViewModel(): ViewModel() {
     /**
      * crear entero random
      */
-    fun crearRandom() {
+    fun generarSecuencia() {
         // cambiamos estado, por lo tanto la IU se actualiza
         estadoActual.value = Estados.GENERANDO
         _numbers.value = (0..3).random()
         Log.d(TAG_LOG, "creamos random ${_numbers.value} - Estado: ${estadoActual.value}")
-        actualizarNumero(_numbers.value)
+        actualizarSecuencia(_numbers.value)
     }
 
-    fun actualizarNumero(numero: Int) {
+    fun actualizarSecuencia(numero: Int) {
         Log.d(TAG_LOG, "actualizamos numero en Datos - Estado: ${estadoActual.value}")
         Datos.numero = numero
         // cambiamos estado, por lo tanto la IU se actualiza
         estadoActual.value = Estados.ADIVINANDO
     }
 
-    fun sumarCorrecto(){
-        Log.d(TAG_LOG,"Correcto - Estado:  ${estadoActual.value}")
-        numeroCorrecto.value ++
-        estadoActual.value = Estados.CORRECTO
-    }
-
-    fun sumarInorrecto(){
-        Log.d(TAG_LOG,"Incorrecto - Estado:  ${estadoActual.value}")
-        numeroIncorrecto.value ++
-        estadoActual.value = Estados.INCORRECTO
-    }
-    fun sumarBoton(){
-        Log.d(TAG_LOG,"Sumo 1 a la cantidad de veces pulsado - Estado: ${estadoActual.value}")
-        numeroSuma.value ++
-        estadoActual.value = Estados.SUMANDO
-    }
 
     /**
      * comprobar si el boton pulsado es el correcto
@@ -78,12 +59,10 @@ class MyViewModel(): ViewModel() {
 
         Log.d(TAG_LOG, "comprobamos - Estado: ${estadoActual.value}")
         return if (ordinal == Datos.numero) {
-            sumarCorrecto()
             estadoActual.value = Estados.INICIO
             Log.d(TAG_LOG, "GANAMOS - Estado: ${estadoActual.value}")
             true
         } else {
-            sumarInorrecto()
             estadoActual.value = Estados.ADIVINANDO
             Log.d(TAG_LOG, "otro intento - Estado: ${estadoActual.value}")
             false
