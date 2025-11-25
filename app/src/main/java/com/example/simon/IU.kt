@@ -1,11 +1,14 @@
 package com.example.simon;
 
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -38,30 +41,29 @@ fun IU(miViewModel: MyViewModel) {
     // val TAG_LOG = "miDebug"
 
     // botones en horizontal
-    Column(
-        modifier= Modifier.fillMaxWidth().fillMaxHeight().padding(20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceAround)
-    {
-        Column {
-            Row {
-                // creo un boton rojo
-                Boton(miViewModel, Colores.CLASE_ROJO)
-
-                // creo un boton verde
-                Boton(miViewModel, Colores.CLASE_VERDE)
+    Box(
+        modifier = Modifier.fillMaxSize().background(Color(0xFF6A0DAD)), // Fondo morado simple
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(20.dp)
+        ) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Boton(miViewModel, Colores.CLASE_ROJO)
+                    Boton(miViewModel, Colores.CLASE_VERDE)
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Boton(miViewModel, Colores.CLASE_AZUL)
+                    Boton(miViewModel, Colores.CLASE_AMARILLO)
+                }
             }
-            Row {
-                // creo un boton azul
-                Boton(miViewModel, Colores.CLASE_AZUL)
 
-                // creo un boton amarillo
-                Boton(miViewModel, Colores.CLASE_AMARILLO)
-            }
+            Boton_Start(miViewModel, Colores.CLASE_START)
         }
-        // creao boton Start
-
-        Boton_Start(miViewModel, Colores.CLASE_START)
     }
 }
 
