@@ -2,8 +2,10 @@ package com.example.simon;
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 class MyViewModel(): ViewModel() {
 
     private val TAG_LOG = "miDebug"
@@ -14,6 +16,8 @@ class MyViewModel(): ViewModel() {
     var _numbers = MutableStateFlow(0)
     var _nSecuenciaActual: MutableStateFlow<Int> = MutableStateFlow(0)
     var _ronda = MutableStateFlow(0)
+    // Color que se está mostrando en este momento (por defecto -1 significa ninguno)
+    var _colorActivo: MutableStateFlow<Int> = MutableStateFlow(-1)
 
 
 
@@ -25,14 +29,7 @@ class MyViewModel(): ViewModel() {
         estadoActual.value = Estados.GENERANDO
         _numbers.value = (0..3).random()
         Log.d(TAG_LOG, "creamos random ${_numbers.value} - Estado: ${estadoActual.value}")
-        actualizarNNuevo(_numbers.value)
-    }
-
-    fun actualizarNNuevo(numero: Int) {
-        Log.d(TAG_LOG, "actualizamos numero en Datos - Estado: ${estadoActual.value}")
-        Datos.numero = numero
-        _listaSecuencia.value += numero
-        setSecuencia( _listaSecuencia.value)
+        setNNuevo(_numbers.value)
     }
 
     fun comprobar(numeroAdivinar: Int) {
@@ -45,19 +42,43 @@ class MyViewModel(): ViewModel() {
             }
     }
 
-
+    suspend fun mostrarColores(){
+        _colorActivo.value = -1
+        delay(200)
+        for (color in Datos.secuencia) {
+            _colorActivo.value = color
+            delay(500)
+            _colorActivo.value = -1
+            delay(200)
+        }
+        estadoActual.value = Estados.ADIVINANDO
+        Log.d(TAG_LOG, "Tu turno - Estado: ${estadoActual.value}")
+    }
     fun reiniciarJuego(){
-        Log.d(TAG_LOG, "fallaste, reiniciando - Estado: ${estadoActual.value}")
+        Log.d(TAG_LOG, "fallaste,has perdido, reiniciando - Estado: ${estadoActual.value}")
+        Log.d(TAG_LOG, "nivel alcanzado: ${Datos.ronda}")
+
         _listaSecuencia.value = emptyList()
         _nSecuenciaActual.value = 0
         _ronda.value = 0
         estadoActual.value = Estados.INICIO
     }
 
+    fun setNNuevo(numero: Int) {
+        Log.d(TAG_LOG, "actualizamos numero en Datos - Estado: ${estadoActual.value}")
+        Datos.numero = numero
+        _listaSecuencia.value += numero
+        setSecuencia(_listaSecuencia.value)
+    }
+
     fun setSecuencia(list: List<Int>){
         Datos.secuencia = list
         Log.d(TAG_LOG, "chuleta: ${_listaSecuencia.value}")
-        estadoActual.value = Estados.ADIVINANDO
+        estadoActual.value = Estados.MOSTRANDO
+        Log.d(TAG_LOG, "MOSTRANDO COLORESS - Estado: ${estadoActual.value}")
+        viewModelScope.launch {
+            mostrarColores()
+        }
     }
 
     fun setRonda(){

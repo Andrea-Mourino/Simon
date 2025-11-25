@@ -35,12 +35,13 @@ enum class Colores(val color: Color, val color_suave: Color = Color.Transparent,
  * @param start_activo: Boolean si el boton Start esta activo
  * @param boton_activo: Boolean si los botones de colores estan activos
  */
-enum class Estados(val start_activo: Boolean, val boton_activo: Boolean) {
-    INICIO(start_activo = true, boton_activo = false),
-    GENERANDO(start_activo = false, boton_activo = false),
-    ADIVINANDO(start_activo = false, boton_activo = true),
+enum class Estados(val start_activo: Boolean, val boton_activo: Boolean, val boton_secuencia: Boolean) {
+    INICIO(start_activo = true, boton_activo = false, boton_secuencia = false),
+    GENERANDO(start_activo = false, boton_activo = false, boton_secuencia = false),
+    ADIVINANDO(start_activo = false, boton_activo = true, boton_secuencia = false),
 
-    REINICIANDO(start_activo = false, boton_activo = false),
+    REINICIANDO(start_activo = false, boton_activo = false, boton_secuencia = false),
 
+    MOSTRANDO(start_activo = false, boton_activo = true, boton_secuencia = true),
 
 }
