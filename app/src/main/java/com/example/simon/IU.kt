@@ -69,30 +69,15 @@ fun IU(miViewModel: MyViewModel) {
 
 @Composable
 fun Boton(miViewModel: MyViewModel, enum_color: Colores) {
-
-    // para que sea mas facil la etiqueta del log
-    val TAG_LOG = "miDebug"
-
-    // variable para el estado del boton
-    var _activo = miViewModel.estadoActual.collectAsState().value.boton_activo
-
-
-    // separador entre botones
-    Spacer(modifier = Modifier.size(10.dp))
+    val _activo = miViewModel.estadoActual.collectAsState().value.boton_activo
 
     Button(
         enabled = _activo,
-        // utilizamos el color del enum
-        colors =  ButtonDefaults.buttonColors(enum_color.color),
-        onClick = {
-            Log.d(TAG_LOG, "Dentro del boton: ${enum_color.ordinal}")
-            miViewModel.comprobar(enum_color.ordinal)
-        },
-        modifier = Modifier
-            .size((80).dp, (40).dp)
+        onClick = { miViewModel.comprobar(enum_color.ordinal) },
+        colors = ButtonDefaults.buttonColors(enum_color.color),
+        modifier = Modifier.size(100.dp, 60.dp)
     ) {
-        // utilizamos el texto del enum
-        Text(text = enum_color.txt, fontSize = 10.sp)
+        Text(text = enum_color.txt.uppercase(), color = Color.White)
     }
 }
 
