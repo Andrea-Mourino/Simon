@@ -83,47 +83,16 @@ fun Boton(miViewModel: MyViewModel, enum_color: Colores) {
 
 @Composable
 fun Boton_Start(miViewModel: MyViewModel, enum_color: Colores) {
-
-    // para que sea mas facil la etiqueta del log
-    val TAG_LOG = "miDebug"
-
-    // variable para el estado del boton
-    var _activo = miViewModel.estadoActual.collectAsState().value.start_activo
-
-    // variable para el color del boton usado en el LaunchedEffect
-    var _color by remember { mutableStateOf(enum_color.color) }
-
-    // cremos el efecto de parpadear con Launchedffect
-    // mientras el estado es INICIO el boton start parpadea
-    // si cambia _activo, el LaunchedEffect se inicia o se para
-    // https://developer.android.com/develop/ui/compose/side-effects?hl=es-419#launchedeffect
-
-    LaunchedEffect(_activo) {
-        Log.d(TAG_LOG, "LaunchedEffect - Estado: ${_activo}")
-        // solo si el boton está activo parpadea
-        while (_activo) {
-            _color = enum_color.color_suave
-            delay(100)
-            _color = enum_color.color
-            delay(500)
-        }
-    }
-    // separador entre botones
-    Spacer(modifier = Modifier.size(40.dp))
+    val _activo = miViewModel.estadoActual.collectAsState().value.start_activo
     Button(
         enabled = _activo,
-        // utilizamos el color del enum
-        // colors =  ButtonDefaults.buttonColors(enum_color.color),
-        colors = ButtonDefaults.buttonColors(_color),
         onClick = {
-            Log.d(TAG_LOG, "Dentro del Start - Estado: ${miViewModel.estadoActual.value.name}")
             miViewModel.crearRandom()
             miViewModel.sumarBoton()
         },
-        modifier = Modifier
-            .size((100).dp, (40).dp)
+        colors = ButtonDefaults.buttonColors(enum_color.color),
+        modifier = Modifier.size(140.dp, 70.dp)
     ) {
-        // utilizamos el texto del enum
-        Text(text = enum_color.txt, fontSize = 10.sp)
+        Text(text = enum_color.txt.uppercase(), color = Color.White)
     }
 }
