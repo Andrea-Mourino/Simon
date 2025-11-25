@@ -17,9 +17,7 @@ class MyViewModel(): ViewModel() {
     // patron de diseño observer
     val estadoActual = MutableStateFlow(Estados.INICIO)
 
-
-    // este va a ser nuestra lista para la secuencia random
-    // usamos mutable, ya que la queremos modificar
+    var _listaSecuencia = MutableStateFlow<List<Int>>(emptyList())
     var _numbers = MutableStateFlow(0)
 
     // inicializamos variables cuando instanciamos
@@ -42,10 +40,15 @@ class MyViewModel(): ViewModel() {
     fun actualizarSecuencia(numero: Int) {
         Log.d(TAG_LOG, "actualizamos numero en Datos - Estado: ${estadoActual.value}")
         Datos.numero = numero
+        _listaSecuencia.value += numero
+        Log.d(TAG_LOG, "Probando si funciona la lista: ${_listaSecuencia.value}")
         // cambiamos estado, por lo tanto la IU se actualiza
         estadoActual.value = Estados.ADIVINANDO
     }
 
+    fun cogerSecuencia(){
+
+    }
 
     /**
      * comprobar si el boton pulsado es el correcto

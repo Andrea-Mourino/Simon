@@ -1,12 +1,15 @@
 package com.example.simon;
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
+import androidx.navigationevent.NavigationEventInfo
 
 /**
  * Clase para almacenar los datos del juego
  */
 object Datos {
     var numero = 0
+    var secuencia = listOf<Int>()
 }
 
 /**
