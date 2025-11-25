@@ -81,13 +81,25 @@ fun Boton(miViewModel: MyViewModel, enum_color: Colores) {
 @Composable
 fun Boton_Start(miViewModel: MyViewModel, enum_color: Colores) {
     val _activo = miViewModel.estadoActual.collectAsState().value.start_activo
+    var colorActual by remember { mutableStateOf(enum_color.color) }
+    val colorAnim = animateColorAsState(targetValue = colorActual)
+
+    LaunchedEffect(_activo) {
+        while (_activo) {
+            colorActual = enum_color.color_suave
+            delay(300)
+            colorActual = enum_color.color
+            delay(500)
+        }
+    }
+
     Button(
         enabled = _activo,
         onClick = {
             miViewModel.crearRandom()
             miViewModel.sumarBoton()
         },
-        colors = ButtonDefaults.buttonColors(enum_color.color),
+        colors = ButtonDefaults.buttonColors(colorAnim.value),
         shape = RoundedCornerShape(20.dp),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 10.dp),
         modifier = Modifier.size(140.dp, 70.dp)
