@@ -12,7 +12,7 @@ class MyViewModel(): ViewModel() {
 
     private val TAG_LOG = "miDebug"
 
-    val estadoActual = MutableStateFlow(Estados.INICIO)
+    val estadoActual = MutableStateFlow(GameState.INICIO)
 
     var _listaSecuencia = MutableStateFlow<List<Int>>(emptyList())
     var _numbers = MutableStateFlow(0)
@@ -31,7 +31,7 @@ class MyViewModel(): ViewModel() {
     }
 
     fun generarNNuevo() {
-        estadoActual.value = Estados.GENERANDO
+        estadoActual.value = GameState.GENERANDO
         _numbers.value = (0..3).random()
         Log.d(TAG_LOG, "creamos random ${_numbers.value} - Estado: ${estadoActual.value}")
         setNNuevo(_numbers.value)
@@ -47,13 +47,13 @@ class MyViewModel(): ViewModel() {
                  }
              } else {
                  hacerSonido(-1)
-                 estadoActual.value = Estados.REINICIANDO
+                 estadoActual.value = GameState.REINICIANDO
                  reiniciarJuego()
             }
     }
 
     suspend fun botonPulsado(){
-        estadoActual.value = Estados.PULSADO
+        estadoActual.value = GameState.PULSADO
         delay(200)
         setnSecuencia()
     }
@@ -68,7 +68,7 @@ class MyViewModel(): ViewModel() {
             _colorActivo.value = -1
             delay(200)
         }
-        estadoActual.value = Estados.ADIVINANDO
+        estadoActual.value = GameState.ADIVINANDO
         Log.d(TAG_LOG, "Tu turno - Estado: ${estadoActual.value}")
     }
 
@@ -116,7 +116,7 @@ class MyViewModel(): ViewModel() {
         _nSecuenciaActual.value = 0
         _ronda.value = 0
         Datos.ronda = _ronda.value
-        estadoActual.value = Estados.INICIO
+        estadoActual.value = GameState.INICIO
     }
 
     fun setNNuevo(numero: Int) {
@@ -129,7 +129,7 @@ class MyViewModel(): ViewModel() {
     fun setSecuencia(list: List<Int>){
         Datos.secuencia = list
         Log.d(TAG_LOG, "chuleta: ${_listaSecuencia.value}")
-        estadoActual.value = Estados.MOSTRANDO
+        estadoActual.value = GameState.MOSTRANDO
         Log.d(TAG_LOG, "MOSTRANDO COLORESS - Estado: ${estadoActual.value}")
         viewModelScope.launch {
             mostrarColores()
@@ -137,7 +137,7 @@ class MyViewModel(): ViewModel() {
     }
 
     fun setRonda(){
-        estadoActual.value = Estados.GENERANDO
+        estadoActual.value = GameState.GENERANDO
         Log.d(TAG_LOG, "avanzando a la siguiente ronda - Estado: ${estadoActual.value}")
         _ronda.value ++
         Datos.ronda = _ronda.value
@@ -149,7 +149,7 @@ class MyViewModel(): ViewModel() {
             _nSecuenciaActual.value = 0
             setRonda()
         } else {
-            estadoActual.value = Estados.ADIVINANDO
+            estadoActual.value = GameState.ADIVINANDO
             Log.d(TAG_LOG, "dime el siguiente numero - Estado: ${estadoActual.value}")
             _nSecuenciaActual.value ++
         }

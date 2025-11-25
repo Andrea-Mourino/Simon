@@ -1,8 +1,6 @@
 package com.example.simon;
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
-import androidx.navigationevent.NavigationEventInfo
 
 /**
  * Clase para almacenar los datos del juego
@@ -36,7 +34,7 @@ enum class Colores(val color: Color, val color_suave: Color = Color.Transparent,
  * @param start_activo: Boolean si el boton Start esta activo
  * @param boton_activo: Boolean si los botones de colores estan activos
  */
-enum class Estados(val start_activo: Boolean, val boton_activo: Boolean, val boton_secuencia: Boolean,val boton_pulsado: Boolean) {
+enum class GameState(val start_activo: Boolean, val boton_activo: Boolean, val boton_secuencia: Boolean, val boton_pulsado: Boolean) {
     INICIO(start_activo = true, boton_activo = false, boton_secuencia = false, boton_pulsado = false),
     GENERANDO(start_activo = false, boton_activo = false, boton_secuencia = false, boton_pulsado = false),
     ADIVINANDO(start_activo = false, boton_activo = true, boton_secuencia = false, boton_pulsado = false),
