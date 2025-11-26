@@ -19,6 +19,8 @@ enum class Colores(val color: Color, val color_suave: Color = Color.Transparent,
 }
 
 /**
+ *
+ *
  * Estados del juego
  * INICIO: estado inicial
  * GENERANDO: generando numero random
