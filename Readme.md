@@ -1,4 +1,4 @@
-# Simon Game - Android App (Alexandre Sinisterra & Andrea Mouriño)
+# Simon - Android App (Alexandre Sinisterra & Andrea Mouriño)
 
 ## Descripción del proyecto
 
