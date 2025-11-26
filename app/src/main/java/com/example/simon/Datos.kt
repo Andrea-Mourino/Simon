@@ -2,14 +2,6 @@ package com.example.simon;
 
 import androidx.compose.ui.graphics.Color
 
-/**
- * Clase para almacenar los datos del juego
- */
-object Datos {
-    var numero = 0
-    var secuencia = listOf<Int>()
-    var ronda = 0
-}
 
 /**
  * Colores utilizados
@@ -31,8 +23,13 @@ enum class Colores(val color: Color, val color_suave: Color = Color.Transparent,
  * INICIO: estado inicial
  * GENERANDO: generando numero random
  * ADIVINANDO: adivinando el numero
+ * REINICIANDO: reiniciando juego
+ * MOSTRANDO: enseñando secuencia
+ * PULSADO: se ha pulsado un boton
  * @param start_activo: Boolean si el boton Start esta activo
  * @param boton_activo: Boolean si los botones de colores estan activos
+ * @param boton_secuencia: Boolean para saber si se esta mostrando la secuencia
+ * @param boton_pulsado: Boolean para saber si se acaba de pulsar el boton
  */
 enum class GameState(val start_activo: Boolean, val boton_activo: Boolean, val boton_secuencia: Boolean, val boton_pulsado: Boolean) {
     INICIO(start_activo = true, boton_activo = false, boton_secuencia = false, boton_pulsado = false),

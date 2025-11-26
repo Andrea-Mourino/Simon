@@ -72,14 +72,16 @@ fun Boton(miViewModel: MyViewModel, enum_color: Colores) {
     // para que sea mas facil la etiqueta del log
     val TAG_LOG = "miDebug"
 
-    // variable para el estado del boton
+    // valores de los estados
     var _activo = miViewModel.estadoActual.collectAsState().value.boton_activo
     var _secuencia = miViewModel.estadoActual.collectAsState().value.boton_secuencia
     var _pulsado = miViewModel.estadoActual.collectAsState().value.boton_pulsado
 
+    //colores de mostrar secuencia
     val colorActivo by miViewModel._colorActivo.collectAsState()
     val botonColor = if (colorActivo == enum_color.ordinal) enum_color.color_brillante else enum_color.color_suave
 
+    //colores de pulsar boton
     val colorPulsado by miViewModel._colorPulsado.collectAsState()
     val botonColorPulsado = if (colorPulsado == enum_color.ordinal) enum_color.color_brillante else enum_color.color
 
@@ -88,7 +90,7 @@ fun Boton(miViewModel: MyViewModel, enum_color: Colores) {
 
     Button(
         enabled = _activo,
-        // utilizamos el color del enum
+        // dependiendo del valor del estado, mostraremos los colores correspondientes
         colors =  if (_secuencia){ButtonDefaults.buttonColors(botonColor)
                   }else if(_pulsado){ ButtonDefaults.buttonColors(botonColorPulsado)
                 }else{ButtonDefaults.buttonColors(enum_color.color)},
@@ -96,7 +98,7 @@ fun Boton(miViewModel: MyViewModel, enum_color: Colores) {
             if (!_secuencia) {
                 Log.d(TAG_LOG, "Dentro del boton: ${enum_color.ordinal}")
                 miViewModel.comprobar(enum_color.ordinal)
-            } else {
+            } else { //para que no puedas fastidiar el programa mientras suene la secuencia
                 Log.d(TAG_LOG, "Click ignorado temporalmente")
             }
         },
