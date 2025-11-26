@@ -59,23 +59,42 @@ fun IU(miViewModel: MyViewModel) {
 
 @Composable
 fun Boton(miViewModel: MyViewModel, enum_color: Colores) {
-    val estado = miViewModel.estadoActual.collectAsState().value
-    val colorActivo by miViewModel._colorActivo.collectAsState()
-    val colorPulsado by miViewModel._colorPulsado.collectAsState()
 
-    val botonColor = when {
-        estado.boton_secuencia && colorActivo == enum_color.ordinal -> enum_color.color_brillante
-        estado.boton_pulsado && colorPulsado == enum_color.ordinal -> enum_color.color_brillante
-        else -> enum_color.color
-    }
+    // para que sea mas facil la etiqueta del log
+    val TAG_LOG = "miDebug"
+
+    // valores de los estados
+    var _activo = miViewModel.estadoActual.collectAsState().value.boton_activo
+    var _secuencia = miViewModel.estadoActual.collectAsState().value.boton_secuencia
+    var _pulsado = miViewModel.estadoActual.collectAsState().value.boton_pulsado
+
+    //colores de mostrar secuencia
+    val colorActivo by miViewModel._colorActivo.collectAsState()
+    val botonColor = if (colorActivo == enum_color.ordinal) enum_color.color_brillante else enum_color.color_suave
+
+    //colores de pulsar boton
+    val colorPulsado by miViewModel._colorPulsado.collectAsState()
+    val botonColorPulsado = if (colorPulsado == enum_color.ordinal) enum_color.color_brillante else enum_color.color
+
+    // separador entre botones
+    Spacer(modifier = Modifier.size(10.dp))
 
     Button(
-        enabled = estado.boton_activo,
-        onClick = { miViewModel.comprobar(enum_color.ordinal) },
-        shape = RoundedCornerShape(16.dp),
-        elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
-        colors = ButtonDefaults.buttonColors(botonColor),
-        modifier = Modifier.size(100.dp, 60.dp)
+        enabled = _activo,
+        // dependiendo del valor del estado, mostraremos los colores correspondientes
+        colors =  if (_secuencia){ButtonDefaults.buttonColors(botonColor)
+                  }else if(_pulsado){ ButtonDefaults.buttonColors(botonColorPulsado)
+                }else{ButtonDefaults.buttonColors(enum_color.color)},
+        onClick = {
+            if (!_secuencia) {
+                Log.d(TAG_LOG, "Dentro del boton: ${enum_color.ordinal}")
+                miViewModel.comprobar(enum_color.ordinal)
+            } else { //para que no puedas fastidiar el programa mientras suene la secuencia
+                Log.d(TAG_LOG, "Click ignorado temporalmente")
+            }
+        },
+        modifier = Modifier
+            .size((80).dp, (40).dp)
     ) {
         Text(text = enum_color.txt.uppercase(), color = Color.White)
     }
