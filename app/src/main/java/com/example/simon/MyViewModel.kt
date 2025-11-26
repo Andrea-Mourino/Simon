@@ -2,113 +2,194 @@ package com.example.simon;
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
-
+import android.media.AudioManager
+import android.media.ToneGenerator
 class MyViewModel(): ViewModel() {
 
-    // etiqueta para logcat
     private val TAG_LOG = "miDebug"
-
-    // estados del juego
-    // usamos LiveData para que la IU se actualice
-    // patron de diseño observer
-    val estadoActual = MutableStateFlow(Estados.INICIO)
-
-    var numeroSuma : MutableStateFlow<Int> = MutableStateFlow(0)
-    var numeroCorrecto : MutableStateFlow<Int> = MutableStateFlow(0)
-    var numeroIncorrecto : MutableStateFlow<Int> = MutableStateFlow(0)
-
-    // este va a ser nuestra lista para la secuencia random
-    // usamos mutable, ya que la queremos modificar
+    val estadoActual = MutableStateFlow(GameState.INICIO)
+    var _listaSecuencia = MutableStateFlow<List<Int>>(emptyList())
     var _numbers = MutableStateFlow(0)
+    var _nSecuenciaActual: MutableStateFlow<Int> = MutableStateFlow(0)
+    var _ronda = MutableStateFlow(0)
+    var _colorActivo: MutableStateFlow<Int> = MutableStateFlow(-1)
+    var _colorPulsado: MutableStateFlow<Int> = MutableStateFlow(-1)
+    val tone = ToneGenerator(AudioManager.STREAM_MUSIC, 100)
 
-    // inicializamos variables cuando instanciamos
+
     init {
-        // estado inicial
         Log.d(TAG_LOG, "Inicializamos ViewModel - Estado: ${estadoActual.value}")
     }
 
     /**
-     * crear entero random
+     *
+     *  -----------------------------------------------------------------------------------------------------
+     *  En este programa hay varias clases muy simples que a veces incluso solo suman 1 a alguna
+     *  variable. Decidí separarlo así en vez de juntarlo para que sea mucho mas visual, legible y ordenado;
+     *  además, se pueden detectar errores con una sorprendentemente mayor eficacia
+     * -----------------------------------------------------------------------------------------------------
+     *
      */
-    fun crearRandom() {
-        // cambiamos estado, por lo tanto la IU se actualiza
-        estadoActual.value = Estados.GENERANDO
-        _numbers.value = (0..3).random()
+
+
+    /**
+     * Esta funcion se dedica a crear el siguiente numero/color de la secuencia
+     * lo realiza con un random y utilizamos numeros del 0 al 3
+     */
+    fun generarNNuevo() {
+        estadoActual.value = GameState.GENERANDO
+        _numbers.value = (0..3).random() //creamos el numero
         Log.d(TAG_LOG, "creamos random ${_numbers.value} - Estado: ${estadoActual.value}")
-        actualizarNumero(_numbers.value)
+        setNNuevo(_numbers.value)
     }
 
-    fun actualizarNumero(numero: Int) {
+    /**
+     * En esta función se van mostrando los colores cambiando
+     * el valor de la variable _colorActivo y antes cambiando
+     * el estado
+     */
+    suspend fun mostrarColores(){
+        _colorActivo.value = -1 // con -1 hacemos que ningun color se vea
+        delay(200)
+        for (color in _listaSecuencia.value) { //recorremos la secuencia
+            //vamos igualando el color activo con el que toca de la secuencia
+            //así desde la view sabrá que botón mostar
+            _colorActivo.value = color
+            hacerSonido(_colorActivo.value) //sonido del boton correspondiente
+            delay(500)
+            _colorActivo.value = -1 //volvemos a dejar su valor base
+            delay(200)
+        }
+        estadoActual.value = GameState.ADIVINANDO
+        Log.d(TAG_LOG, "Tu turno - Estado: ${estadoActual.value}")
+    }
+
+    /**
+     * En esta funcion actualizamos la secuencia
+     * @param numero: metemos el nuevo numero de la secuencia
+     */
+    fun setNNuevo(numero: Int) {
         Log.d(TAG_LOG, "actualizamos numero en Datos - Estado: ${estadoActual.value}")
-        Datos.numero = numero
-        // cambiamos estado, por lo tanto la IU se actualiza
-        estadoActual.value = Estados.ADIVINANDO
-    }
-
-    fun sumarCorrecto(){
-        Log.d(TAG_LOG,"Correcto - Estado:  ${estadoActual.value}")
-        numeroCorrecto.value ++
-        estadoActual.value = Estados.CORRECTO
-    }
-
-    fun sumarInorrecto(){
-        Log.d(TAG_LOG,"Incorrecto - Estado:  ${estadoActual.value}")
-        numeroIncorrecto.value ++
-        estadoActual.value = Estados.INCORRECTO
-    }
-    fun sumarBoton(){
-        Log.d(TAG_LOG,"Sumo 1 a la cantidad de veces pulsado - Estado: ${estadoActual.value}")
-        numeroSuma.value ++
-        estadoActual.value = Estados.SUMANDO
-    }
-
-    /**
-     * comprobar si el boton pulsado es el correcto
-     * @param ordinal: Int numero de boton pulsado
-     * @return Boolean si coincide TRUE, si no FALSE
-     */
-    fun comprobar(ordinal: Int): Boolean {
-
-        // mientras comprobamos, lanzamos estados auxiliares en paralelo
-        estadosAuxiliares()
-
-        Log.d(TAG_LOG, "comprobamos - Estado: ${estadoActual.value}")
-        return if (ordinal == Datos.numero) {
-            sumarCorrecto()
-            estadoActual.value = Estados.INICIO
-            Log.d(TAG_LOG, "GANAMOS - Estado: ${estadoActual.value}")
-            true
-        } else {
-            sumarInorrecto()
-            estadoActual.value = Estados.ADIVINANDO
-            Log.d(TAG_LOG, "otro intento - Estado: ${estadoActual.value}")
-            false
-        }
-    }
-
-
-
-    /**
-     * Corutina que lanza estados auxiliares
-     */
-    fun estadosAuxiliares() {
+        _listaSecuencia.value += numero //añadimos el color a la secuencia
+        Log.d(TAG_LOG, "chuleta: ${_listaSecuencia.value}")
+        estadoActual.value = GameState.MOSTRANDO
+        Log.d(TAG_LOG, "MOSTRANDO COLORESS - Estado: ${estadoActual.value}")
         viewModelScope.launch {
-            // guardamos el estado auxiliar
-            var estadoAux = EstadosAuxiliares.AUX1
-
-            // hacemos un cambio a tres estados auxiliares
-            Log.d(TAG_LOG, "estado (corutina): ${estadoAux}")
-            delay(1500)
-            estadoAux = EstadosAuxiliares.AUX2
-            Log.d(TAG_LOG, "estado (corutina): ${estadoAux}")
-            delay(1500)
-            estadoAux = EstadosAuxiliares.AUX3
-            Log.d(TAG_LOG, "estado (corutina): ${estadoAux}")
-            delay(1500)
+            mostrarColores() //empezamos a mostrar la secuencia
         }
+    }
+
+    /**
+     * Cuando se pulsa un boton se ejecuta esta funcion
+     * esta comprueba si el color que hemos pulsado coincide con el que toca de la secuencia
+     * (lo hacemos con una lista y su índice)
+     *
+     * llamaremos a la funcion de hacer el sonido que corresponde y comprobaremos si es el ultimo
+     * color de la secuencia en caso de acertar, o reiniciaremos el juego en caso de fallar
+     *
+     * @param numeroAdivinar: Es el numero que corresponde el botón pulsado
+     */
+    fun comprobar(numeroAdivinar: Int) {
+        _colorPulsado.value = numeroAdivinar //color pulsado
+        if (numeroAdivinar == _listaSecuencia.value[_nSecuenciaActual.value]) { //vemos si el pulsado es igual al color actual
+            Log.d(TAG_LOG, "adivinaste - Estado: ${estadoActual.value}")
+            viewModelScope.launch { //en caso de que sea
+                hacerSonido(_colorPulsado.value) //hacemos el sonido
+                estadoActual.value = GameState.PULSADO
+                delay(200)
+                setnSecuencia() //comprobamos el numero de la secuencia
+            }
+        } else { //en caso de fallar
+            hacerSonido(-1) //sonido de fallo
+            estadoActual.value = GameState.REINICIANDO
+            reiniciarJuego() //reiniciamos juego
+        }
+    }
+
+    /**
+     * Esta funcion comprueba si el numero actual de la secuencia ya es el ultimo de esta,
+     * yo lo compruebo comparandolo con el numero de ronda ya que coincide siempre.
+     *
+     * Si el numero es el ultimo, llamamos la funcion setRonda()
+     * Si el numero NO es el último, pasamos al siguiente numero de la funcion
+     */
+    fun setnSecuencia(){
+        if (_nSecuenciaActual.value == _ronda.value){ //si es el numero final de la secuencia
+            _nSecuenciaActual.value = 0 //volvemos al principio de la secuencia
+            setRonda()
+        } else {
+            estadoActual.value = GameState.ADIVINANDO
+            Log.d(TAG_LOG, "dime el siguiente numero - Estado: ${estadoActual.value}")
+            _nSecuenciaActual.value ++ //pasamos al siguiente numero
+        }
+    }
+
+    /**
+     * Aumentamos el valor de la ronda y llamamos a la funcion generarNNuevo para
+     * que cree el siguiente color aleatorio de la secuencia
+     */
+    fun setRonda(){
+        estadoActual.value = GameState.GENERANDO
+        Log.d(TAG_LOG, "avanzando a la siguiente ronda - Estado: ${estadoActual.value}")
+        _ronda.value ++ //aumentamos la ronda
+        generarNNuevo()
+    }
+
+    /**
+     * Una funcion para simular que el juego se reinicia, simplemente vuelvo a poner los
+     * valores base de las variables y cambio el estado a inicio
+     */
+    fun reiniciarJuego(){
+        Log.d(TAG_LOG, "fallaste,has perdido, reiniciando - Estado: ${estadoActual.value}")
+        Log.d(TAG_LOG, "nivel alcanzado: ${_ronda.value}")
+
+        _listaSecuencia.value = emptyList() //vaciamos la secuencia
+        _nSecuenciaActual.value = 0
+        _ronda.value = 0
+        estadoActual.value = GameState.INICIO
+    }
+
+    /**
+     * Segun el color que elijamos hace un sonido
+     * Si no se elige uno valido por defecto suena el de error
+     * @param color: Se pasa el numero
+     */
+    fun hacerSonido(color: Int){
+        when (color) {
+            0 -> sonidoDo()
+            1 -> sonidoMi()
+            2 -> sonidoSol()
+            3 -> sonidoDoGrave()
+            else -> sonidoError()
+        }
+    }
+
+    fun sonidoDo() {
+        Log.d(TAG_LOG, "Pulsado Do agudo")
+        tone.startTone(ToneGenerator.TONE_DTMF_1, 200)
+    }
+
+    fun sonidoMi() {
+        Log.d(TAG_LOG, "Pulsado Mi")
+        tone.startTone(ToneGenerator.TONE_DTMF_3, 200)
+    }
+
+    fun sonidoSol() {
+        Log.d(TAG_LOG, "Pulsado Sol")
+        tone.startTone(ToneGenerator.TONE_DTMF_7, 200)
+    }
+
+    fun sonidoDoGrave() {
+        Log.d(TAG_LOG, "Pulsado Do grave")
+        tone.startTone(ToneGenerator.TONE_DTMF_9, 200)
+    }
+
+    fun sonidoError() {
+        Log.d(TAG_LOG, "Sonido de error")
+        tone.startTone(ToneGenerator.TONE_CDMA_CALL_SIGNAL_ISDN_INTERGROUP, 300)
     }
 }
