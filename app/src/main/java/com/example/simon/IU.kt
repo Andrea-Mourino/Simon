@@ -15,6 +15,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import androidx.compose.runtime.collectAsState
+import android.util.Log
+
 
 /**
  * Interfaz de usuario unificada y ajustada
@@ -83,8 +85,8 @@ fun Boton(miViewModel: MyViewModel, enum_color: Colores) {
         enabled = _activo,
         // dependiendo del valor del estado, mostraremos los colores correspondientes
         colors =  if (_secuencia){ButtonDefaults.buttonColors(botonColor)
-                  }else if(_pulsado){ ButtonDefaults.buttonColors(botonColorPulsado)
-                }else{ButtonDefaults.buttonColors(enum_color.color)},
+        }else if(_pulsado){ ButtonDefaults.buttonColors(botonColorPulsado)
+        }else{ButtonDefaults.buttonColors(enum_color.color)},
         onClick = {
             if (!_secuencia) {
                 Log.d(TAG_LOG, "Dentro del boton: ${enum_color.ordinal}")
