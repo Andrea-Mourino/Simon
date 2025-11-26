@@ -94,12 +94,12 @@ class MyViewModel(): ViewModel() {
      * @param numeroAdivinar: Es el numero que corresponde el botón pulsado
      */
     fun comprobar(numeroAdivinar: Int) {
+        estadoActual.value = GameState.PULSADO
         _colorPulsado.value = numeroAdivinar //color pulsado
         if (numeroAdivinar == _listaSecuencia.value[_nSecuenciaActual.value]) { //vemos si el pulsado es igual al color actual
             Log.d(TAG_LOG, "adivinaste - Estado: ${estadoActual.value}")
             viewModelScope.launch { //en caso de que sea
                 hacerSonido(_colorPulsado.value) //hacemos el sonido
-                estadoActual.value = GameState.PULSADO
                 delay(200)
                 setnSecuencia() //comprobamos el numero de la secuencia
             }
