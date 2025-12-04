@@ -33,7 +33,6 @@ class MyViewModel(application: Application): AndroidViewModel(application) { //p
         record.value = recordGuardado.record
         recordFecha.value = recordGuardado.date
     }
-    // nueva funcion(COMENTARRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR)
     fun comprobarRecord(ronda:Int){
         val recordActual = ControllerShared.obtenerRecord(getApplication())
         //Se comprueba si la ronda superada es mejor que el record
