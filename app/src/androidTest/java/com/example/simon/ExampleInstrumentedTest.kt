@@ -4,14 +4,18 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
 
 class ExampleInstrumentedTest {
 
     private lateinit var viewModel: MyViewModel
+    private lateinit var context: Context
 
     @Before
     fun setup() {
-        viewModel = MyViewModel()
+        context = ApplicationProvider.getApplicationContext()
+        viewModel = MyViewModel(context as android.app.Application)
     }
 
     @Test
@@ -152,5 +156,63 @@ class ExampleInstrumentedTest {
         for (i in 0..3) {
             viewModel.hacerSonido(i)
         }
+    }
+
+    @Test
+    fun `record inicial se obtiene correctamente`() {
+        val recordInicial = viewModel.record.value
+        val recordDesdeSP = ControllerShared.obtenerRecord(context).record
+
+        assertEquals(recordDesdeSP, recordInicial)
+    }
+
+
+    //Al superar el record actual, debe actualizarse en el ViewModel y en SharedPreferences
+
+    @Test
+    fun `actualizar record mayor que el anterior`() = runBlocking {
+        val recordAntes = viewModel.record.value
+        val nuevoRecord = recordAntes + 5
+
+        viewModel.comprobarRecord(nuevoRecord)
+
+        val recordDespues = viewModel.record.value
+        val recordSP = ControllerShared.obtenerRecord(context).record
+
+        assertEquals(nuevoRecord, recordDespues)
+        assertEquals(nuevoRecord, recordSP)
+        assertTrue(recordDespues > recordAntes)
+    }
+
+
+    //Si el record es menor que el actual, no debe cambiar ni en ViewModel ni en SharedPreferences
+
+    @Test
+    fun `actualizar record menor que el anterior no cambia nada`() = runBlocking {
+        val recordAntes = viewModel.record.value
+        val nuevoRecord = if(recordAntes > 0) recordAntes - 1 else 0
+
+        viewModel.comprobarRecord(nuevoRecord)
+
+        val recordDespues = viewModel.record.value
+        val recordSP = ControllerShared.obtenerRecord(context).record
+
+        assertEquals(recordAntes, recordDespues)
+        assertEquals(recordAntes, recordSP)
+    }
+
+
+    //Comprueba que la fecha del record se guarda correctamente al actualizar
+
+    @Test
+    fun `fecha del record se guarda correctamente`() = runBlocking {
+        val nuevoRecord = viewModel.record.value + 1
+        val fechaAntes = ControllerShared.obtenerRecord(context).date
+
+        viewModel.comprobarRecord(nuevoRecord)
+
+        val fechaDespues = ControllerShared.obtenerRecord(context).date
+
+        assertTrue(fechaDespues.isAfter(fechaAntes) || fechaDespues.isEqual(fechaAntes))
     }
 }
