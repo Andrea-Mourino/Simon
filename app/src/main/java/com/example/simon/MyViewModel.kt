@@ -10,11 +10,12 @@ import kotlinx.coroutines.launch
 import android.media.AudioManager
 import android.media.ToneGenerator
 import androidx.lifecycle.AndroidViewModel
+import java.time.LocalDate
 
 class MyViewModel(application: Application): AndroidViewModel(application) { //permite acceder a getAppication
 
     var record = MutableStateFlow(0) //Guarda y expone el record actual al UI usando StateFlow
-
+    var recordFecha = MutableStateFlow(LocalDate.now()) //Guarda y expone la fecha usando StateFlow
     private val TAG_LOG = "miDebug"
     val estadoActual = MutableStateFlow(GameState.INICIO)
     var _listaSecuencia = MutableStateFlow<List<Int>>(emptyList())
@@ -28,14 +29,18 @@ class MyViewModel(application: Application): AndroidViewModel(application) { //p
 
     init {
         Log.d(TAG_LOG, "Inicializamos ViewModel - Estado: ${estadoActual.value}")
-        record.value = ControllerShared.obtenerRecord(getApplication()).record //se lee el record en SharedPreferences y se muestar en UI
+        val recordGuardado = ControllerShared.obtenerRecord(getApplication())
+        record.value = recordGuardado.record
+        recordFecha.value = recordGuardado.date
     }
     // nueva funcion(COMENTARRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR)
     fun comprobarRecord(ronda:Int){
+        val recordActual = ControllerShared.obtenerRecord(getApplication())
         //Se comprueba si la ronda superada es mejor que el record
-        if(ronda>ControllerShared.obtenerRecord(getApplication()).record){
-            record.value = ronda
-            ControllerShared.actualizarRecord(record.value,getApplication()).record //si la ronda supera el record esta actualiza SharedPreferences
+        if(ronda > recordActual.record){
+            val nuevoRecord = ControllerShared.actualizarRecord(ronda, getApplication())
+            record.value = nuevoRecord.record
+            recordFecha.value = nuevoRecord.date //si la ronda supera el record esta actualiza SharedPreferences
         }
     }
 

@@ -50,9 +50,10 @@ fun IU(miViewModel: MyViewModel) {
                     Boton(miViewModel, Colores.CLASE_AZUL)
                     Boton(miViewModel, Colores.CLASE_AMARILLO)
                 }
-                //comentar
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){ //centrado
-                    Text(text = miViewModel.record.value.toString()) //muestra el record actual en pantalla
+                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)){
+                    Text(text = "Record: ${miViewModel.record.value}")
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(text = "Fecha: ${miViewModel.recordFecha.value}")  //muestra el record actual en pantalla
 
                 }
             }
