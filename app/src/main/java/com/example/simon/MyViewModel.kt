@@ -10,6 +10,8 @@ import android.media.AudioManager
 import android.media.ToneGenerator
 class MyViewModel(): ViewModel() {
 
+    var record = MutableStateFlow(0)
+
     private val TAG_LOG = "miDebug"
     val estadoActual = MutableStateFlow(GameState.INICIO)
     var _listaSecuencia = MutableStateFlow<List<Int>>(emptyList())
@@ -23,6 +25,14 @@ class MyViewModel(): ViewModel() {
 
     init {
         Log.d(TAG_LOG, "Inicializamos ViewModel - Estado: ${estadoActual.value}")
+    }
+
+    fun comprobarRecord(val ronda:Int){
+        if(ronda>ControllerShared.obtenerRecord(contexto).record){
+            record = ronda
+            ControllerShared.actualizarRecord(record,contexto).record
+        }
+
     }
 
     /**
