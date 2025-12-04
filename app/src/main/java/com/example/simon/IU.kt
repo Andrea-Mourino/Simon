@@ -50,6 +50,11 @@ fun IU(miViewModel: MyViewModel) {
                     Boton(miViewModel, Colores.CLASE_AZUL)
                     Boton(miViewModel, Colores.CLASE_AMARILLO)
                 }
+                //comentar
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){ //centrado
+                    Text(text = miViewModel.record.value.toString()) //muestra el record actual en pantalla
+
+                }
             }
 
             Text(text = "Ronda Nº: $ronda", color = Color.Green)

@@ -1,5 +1,6 @@
 package com.example.simon;
 
+import android.app.Application
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.delay
@@ -8,9 +9,11 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import android.media.AudioManager
 import android.media.ToneGenerator
-class MyViewModel(): ViewModel() {
+import androidx.lifecycle.AndroidViewModel
 
-    var record = MutableStateFlow(0)
+class MyViewModel(application: Application): AndroidViewModel(application) { //permite acceder a getAppication
+
+    var record = MutableStateFlow(0) //Guarda y expone el record actual al UI usando StateFlow
 
     private val TAG_LOG = "miDebug"
     val estadoActual = MutableStateFlow(GameState.INICIO)
@@ -25,14 +28,15 @@ class MyViewModel(): ViewModel() {
 
     init {
         Log.d(TAG_LOG, "Inicializamos ViewModel - Estado: ${estadoActual.value}")
+        record.value = ControllerShared.obtenerRecord(getApplication()).record //se lee el record en SharedPreferences y se muestar en UI
     }
-
-    fun comprobarRecord(val ronda:Int){
-        if(ronda>ControllerShared.obtenerRecord(contexto).record){
-            record = ronda
-            ControllerShared.actualizarRecord(record,contexto).record
+    // nueva funcion(COMENTARRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR)
+    fun comprobarRecord(ronda:Int){
+        //Se comprueba si la ronda superada es mejor que el record
+        if(ronda>ControllerShared.obtenerRecord(getApplication()).record){
+            record.value = ronda
+            ControllerShared.actualizarRecord(record.value,getApplication()).record //si la ronda supera el record esta actualiza SharedPreferences
         }
-
     }
 
     /**
@@ -115,6 +119,7 @@ class MyViewModel(): ViewModel() {
             }
         } else { //en caso de fallar
             hacerSonido(-1) //sonido de fallo
+            comprobarRecord(_ronda.value) //si fallas el juego registra record antes de reiniciar
             estadoActual.value = GameState.REINICIANDO
             reiniciarJuego() //reiniciamos juego
         }
