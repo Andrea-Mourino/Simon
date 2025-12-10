@@ -44,5 +44,13 @@ enum class GameState(val start_activo: Boolean, val boton_activo: Boolean, val b
 
     PULSADO(start_activo = false, boton_activo = true, boton_secuencia = false, boton_pulsado = true),
 
+}
 
+/**
+ * Singleton para los datos del shared
+ */
+object GameConstants {
+    const val PREFS_NAME = "Simon_Prefs_Sinisterra" // nombre
+    const val KEY_HIGH_SCORE = "high_score" // Cclave para la puntuacion
+    const val KEY_HIGH_SCORE_DATE = "high_score_date" // clave para la fecha
 }

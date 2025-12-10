@@ -26,6 +26,8 @@ import android.util.Log
 fun IU(miViewModel: MyViewModel) {
 
     val ronda by miViewModel._ronda.collectAsState()
+    val record by miViewModel._record.collectAsState()
+    val recordFecha by miViewModel._recordFecha.collectAsState()// recogemos los datos de la view
 
     Box(
         modifier = Modifier
@@ -49,6 +51,11 @@ fun IU(miViewModel: MyViewModel) {
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                     Boton(miViewModel, Colores.CLASE_AZUL)
                     Boton(miViewModel, Colores.CLASE_AMARILLO)
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)){
+                    Text(text = "Record: ${record}")
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Text(text = "Fecha: ${recordFecha}")
                 }
             }
 

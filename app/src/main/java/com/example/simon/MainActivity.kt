@@ -11,7 +11,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         // inicializamos ViewModel
-        val miViewModel: MyViewModel = MyViewModel()
+        val miViewModel: MyViewModel = MyViewModel(application)//lo convertimos en aplicacion
 
         enableEdgeToEdge()
         setContent {

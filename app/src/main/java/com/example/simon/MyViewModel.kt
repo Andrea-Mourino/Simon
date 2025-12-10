@@ -1,15 +1,22 @@
 package com.example.simon;
 
+import android.app.Application
 import android.util.Log
-import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import android.media.AudioManager
 import android.media.ToneGenerator
-class MyViewModel(): ViewModel() {
+import androidx.lifecycle.AndroidViewModel
+import com.example.simon.shared_preference.Shared_controller
+import java.time.LocalDate
 
+class MyViewModel(application: Application) : AndroidViewModel(application) {
+
+
+    var _record = MutableStateFlow(0)
+    var _recordFecha = MutableStateFlow(LocalDate.now())
     private val TAG_LOG = "miDebug"
     val estadoActual = MutableStateFlow(GameState.INICIO)
     var _listaSecuencia = MutableStateFlow<List<Int>>(emptyList())
@@ -20,9 +27,14 @@ class MyViewModel(): ViewModel() {
     var _colorPulsado: MutableStateFlow<Int> = MutableStateFlow(-1)
     val tone = ToneGenerator(AudioManager.STREAM_MUSIC, 100)
 
-
+    /**
+     * Lo que se ejecuta al comienzo del programa
+     */
     init {
         Log.d(TAG_LOG, "Inicializamos ViewModel - Estado: ${estadoActual.value}")
+        val recordSave = Shared_controller.obtenerRecord(getApplication())
+        _record.value = recordSave.record
+        _recordFecha.value = recordSave.date
     }
 
     /**
@@ -105,8 +117,24 @@ class MyViewModel(): ViewModel() {
             }
         } else { //en caso de fallar
             hacerSonido(-1) //sonido de fallo
+            comprobarRecord(_ronda.value) // comprueba si batiste el record
             estadoActual.value = GameState.REINICIANDO
             reiniciarJuego() //reiniciamos juego
+        }
+    }
+
+    /**
+     * En esta funcion se verifica si el usuario ha batido el récord, y en caso
+     * de hacerlo llama al controller del shared para actualizarlo
+     *
+     * @param ronda: se le pasa como parámetro en la ronda en la que el usuario ha perdido
+     */
+    fun comprobarRecord(ronda:Int){
+        val recordActual = Shared_controller.obtenerRecord(getApplication())//obtenemos el record
+        if(ronda > recordActual.record){//verificamos
+            val nuevoRecord = Shared_controller.actualizarRecord(ronda, getApplication())
+            _record.value = nuevoRecord.record
+            _recordFecha.value = nuevoRecord.date //actualizamos el record junto con la fecha
         }
     }
 
