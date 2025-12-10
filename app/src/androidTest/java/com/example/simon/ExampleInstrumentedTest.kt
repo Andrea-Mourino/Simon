@@ -1,17 +1,22 @@
 package com.example.simon
 
+import androidx.test.core.app.ApplicationProvider
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
+import android.content.Context
+import com.example.simon.shared_preference.Shared_controller
 
 class ExampleInstrumentedTest {
 
     private lateinit var viewModel: MyViewModel
+    private lateinit var context: Context
 
     @Before
     fun setup() {
-        viewModel = MyViewModel()
+        context = ApplicationProvider.getApplicationContext()
+        viewModel = MyViewModel(context as android.app.Application)
     }
 
     @Test
@@ -153,4 +158,54 @@ class ExampleInstrumentedTest {
             viewModel.hacerSonido(i)
         }
     }
+
+    @Test
+    fun `comprobacion de get del record inicial`() {
+        val inicialRecord = viewModel._record.value
+        val getRecord = Shared_controller.obtenerRecord(context).record
+
+        assertEquals(getRecord, inicialRecord)
+    }
+
+
+    @Test
+    fun `comprobación en la actualizacion del record`() = runBlocking {
+        val actualRecord = viewModel._record.value
+        val newRecord = actualRecord + 67
+
+        viewModel.comprobarRecord(newRecord)
+
+        val actualNewRecord = viewModel._record.value
+        val newGetRecord = Shared_controller.obtenerRecord(context).record
+
+        assertEquals(newRecord, actualNewRecord)
+        assertEquals(newRecord, newGetRecord)
+    }
+
+    @Test
+    fun `comprobación en la actualizacion de la fecha`() = runBlocking {
+        val newRecord = viewModel._record.value + 67
+        val actualDate = Shared_controller.obtenerRecord(context).date
+
+        viewModel.comprobarRecord(newRecord)
+
+        val newDate = Shared_controller.obtenerRecord(context).date
+
+        assertTrue(newDate.isAfter(actualDate) || newDate.isEqual(actualDate))
+    }
+
+    @Test
+    fun `comprobacion de una puntuacion menor al record`() = runBlocking {
+        val actualRecord = viewModel._record.value
+        val newPuntuacion = actualRecord - 67
+
+        viewModel.comprobarRecord(newPuntuacion)
+
+        val actualNewRecord = viewModel._record.value
+        val newGetRecord = Shared_controller.obtenerRecord(context).record
+
+        assertEquals(actualRecord, actualNewRecord)
+        assertEquals(actualRecord, newGetRecord)
+    }
+
 }
