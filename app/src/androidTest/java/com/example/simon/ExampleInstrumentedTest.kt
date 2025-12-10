@@ -159,6 +159,10 @@ class ExampleInstrumentedTest {
         }
     }
 
+    /**
+     * recoge el valor del record inicial de la variable y del shared
+     * entonces comprueba si es el mismo
+     */
     @Test
     fun `comprobacion de get del record inicial`() {
         val inicialRecord = viewModel._record.value
@@ -167,7 +171,11 @@ class ExampleInstrumentedTest {
         assertEquals(getRecord, inicialRecord)
     }
 
-
+    /**
+     * recoge el record actual, le sumamos en una nueva variable 67 para que sea mayor
+     * lo pasamos en comprobar record con el nuevo y por ultimo comprobamos que el valor del record
+     * del shared y de la variable sean el mismo que el nuevo record
+     */
     @Test
     fun `comprobación en la actualizacion del record`() = runBlocking {
         val actualRecord = viewModel._record.value
@@ -182,6 +190,9 @@ class ExampleInstrumentedTest {
         assertEquals(newRecord, newGetRecord)
     }
 
+    /**
+     * lo mismo pero con la fecha
+     */
     @Test
     fun `comprobación en la actualizacion de la fecha`() = runBlocking {
         val newRecord = viewModel._record.value + 67
@@ -194,6 +205,9 @@ class ExampleInstrumentedTest {
         assertTrue(newDate.isAfter(actualDate) || newDate.isEqual(actualDate))
     }
 
+    /**
+     * hacemos lo mismo pero comprobamos con el record en vez de la nueva puntuación
+     */
     @Test
     fun `comprobacion de una puntuacion menor al record`() = runBlocking {
         val actualRecord = viewModel._record.value

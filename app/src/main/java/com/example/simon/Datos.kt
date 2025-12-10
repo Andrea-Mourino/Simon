@@ -48,6 +48,8 @@ enum class GameState(val start_activo: Boolean, val boton_activo: Boolean, val b
 
 /**
  * Singleton para los datos del shared
+ *
+ * https://developer.android.com/reference/android/content/SharedPreferences
  */
 object GameConstants {
     const val PREFS_NAME = "Simon_Prefs_Sinisterra" // nombre

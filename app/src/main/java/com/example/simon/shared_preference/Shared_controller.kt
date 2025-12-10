@@ -7,6 +7,8 @@ import java.time.LocalDate
 
 /**
  * Todala lógica sobre el shared, las funciones
+ *
+ * https://developer.android.com/reference/android/content/SharedPreferences
  */
 object Shared_controller : Shared_conexion{
     /**
