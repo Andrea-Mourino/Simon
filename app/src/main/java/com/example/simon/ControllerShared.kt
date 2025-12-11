@@ -9,7 +9,7 @@ object ControllerShared : InterfazConexion{ //InterfazConexion permite definir c
     private const val PREFS_NAME = "preferencias_app" //Nombre del archivo
     private const val KEY_RECORD = "record" //Clave para almacenar la ronda mas alta
     private const val KEY_FECHA = "date" //Clave para almacenar la fecha que se alcanzo el record
-// pla
+// pla pla
     override fun obtenerRecord(context: Context):Record{ //Obtiene el archivo de SharedPreferences en modo privado
         //Devuelve un objeto Record que contiene la ronda más alta y la fecha correspondiente
         val sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE) //Crea o abre el archivo preferencias_app para leer los valores guardados
