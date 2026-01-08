@@ -1,8 +1,7 @@
-package com.example.simon;
+package com.example.simon.app
 
 import android.app.Application
 import android.util.Log
-import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import androidx.lifecycle.viewModelScope
@@ -11,6 +10,7 @@ import android.media.AudioManager
 import android.media.ToneGenerator
 import androidx.lifecycle.AndroidViewModel
 import java.time.LocalDate
+import kotlin.collections.plusAssign
 
 class MyViewModel(application: Application): AndroidViewModel(application) { //permite acceder a getAppication
 
@@ -92,7 +92,7 @@ class MyViewModel(application: Application): AndroidViewModel(application) { //p
      */
     fun setNNuevo(numero: Int) {
         Log.d(TAG_LOG, "actualizamos numero en Datos - Estado: ${estadoActual.value}")
-        _listaSecuencia.value += numero //añadimos el color a la secuencia
+        _listaSecuencia.value plusAssign numero //añadimos el color a la secuencia
         Log.d(TAG_LOG, "chuleta: ${_listaSecuencia.value}")
         estadoActual.value = GameState.MOSTRANDO
         Log.d(TAG_LOG, "MOSTRANDO COLORESS - Estado: ${estadoActual.value}")

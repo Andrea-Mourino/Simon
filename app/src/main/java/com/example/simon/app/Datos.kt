@@ -1,4 +1,4 @@
-package com.example.simon;
+package com.example.simon.app
 
 import androidx.compose.ui.graphics.Color
 
