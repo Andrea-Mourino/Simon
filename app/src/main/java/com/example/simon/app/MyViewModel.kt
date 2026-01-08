@@ -93,7 +93,7 @@ class MyViewModel(application: Application): AndroidViewModel(application) { //p
      */
     fun setNNuevo(numero: Int) {
         Log.d(TAG_LOG, "actualizamos numero en Datos - Estado: ${estadoActual.value}")
-        _listaSecuencia.value plusAssign numero //añadimos el color a la secuencia
+        _listaSecuencia.value += numero //añadimos el color a la secuencia
         Log.d(TAG_LOG, "chuleta: ${_listaSecuencia.value}")
         estadoActual.value = GameState.MOSTRANDO
         Log.d(TAG_LOG, "MOSTRANDO COLORESS - Estado: ${estadoActual.value}")

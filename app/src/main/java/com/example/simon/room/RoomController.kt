@@ -13,24 +13,28 @@ import java.time.ZoneId
 object RoomController: InterfazConexion {
 
     override fun obtenerRecord(context: Context): Record {
-
+// Construye la instancia de la base de datos
         val db = Room.databaseBuilder(
             context,
-            AppDatabase::class.java, "base-record"
-        ).allowMainThreadQueries().build()
+            AppDatabase::class.java, "base-record" // Nombre del archivo de la base de datos
+        ).allowMainThreadQueries().build() // PERMITE consultas en el hilo principal (cuidado: puede ralentizar la app)
+        // Pide al DAO el último récord. Si es null (primera partida), devuelve un Record de 0
         val miRecord = db.recordDao().getRecord() ?: return Record(0, LocalDate.now())
-        db.close()
+        db.close() // Cerramos la conexión para no gastar memoria del dispositivo
+        // Convierte el Long de la base de datos de nuevo a un objeto LocalDate para que la IU lo entienda.
         return Record(miRecord.record, Instant.ofEpochSecond(miRecord.fecha).atZone(ZoneId.systemDefault()).toLocalDate())
     }
 
     override fun actualizarRecord(record:Int,context: Context): Record {
         val fechaActual = LocalDate.now()
+        // Convertimos la fecha de hoy a un número largo (EpochSecond) para poder guardarlo.
         val fechaLong = fechaActual.atStartOfDay(ZoneId.systemDefault()).toEpochSecond()
         val db = Room.databaseBuilder(
             context,
             AppDatabase::class.java, "base-record"
         ).allowMainThreadQueries().build()
-        val miNuevoRecord =db.recordDao().insert(RercordEntity(record = record, fecha = fechaLong))
+        // Creamos la entidad y la insertamos usando el DAO.
+        db.recordDao().insert(RercordEntity(record = record, fecha = fechaLong))
         db.close()
         return Record(record, fechaActual)
     }
