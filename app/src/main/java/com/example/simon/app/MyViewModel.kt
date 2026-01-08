@@ -9,6 +9,7 @@ import kotlinx.coroutines.launch
 import android.media.AudioManager
 import android.media.ToneGenerator
 import androidx.lifecycle.AndroidViewModel
+import com.example.simon.room.RoomController
 import java.time.LocalDate
 import kotlin.collections.plusAssign
 
@@ -29,15 +30,15 @@ class MyViewModel(application: Application): AndroidViewModel(application) { //p
 
     init {
         Log.d(TAG_LOG, "Inicializamos ViewModel - Estado: ${estadoActual.value}")
-        val recordGuardado = ControllerShared.obtenerRecord(getApplication())
+        val recordGuardado = RoomController.obtenerRecord(getApplication())
         record.value = recordGuardado.record
         recordFecha.value = recordGuardado.date
     }
     fun comprobarRecord(ronda:Int){
-        val recordActual = ControllerShared.obtenerRecord(getApplication())
+        val recordActual = RoomController.obtenerRecord(getApplication())
         //Se comprueba si la ronda superada es mejor que el record
         if(ronda > recordActual.record){
-            val nuevoRecord = ControllerShared.actualizarRecord(ronda, getApplication())
+            val nuevoRecord = RoomController.actualizarRecord(ronda, getApplication())
             record.value = nuevoRecord.record
             recordFecha.value = nuevoRecord.date //si la ronda supera el record esta actualiza SharedPreferences
         }

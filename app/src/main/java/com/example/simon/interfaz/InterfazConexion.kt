@@ -1,6 +1,7 @@
 package com.example.simon.interfaz
 
 import android.content.Context
+import com.example.simon.app.Record
 
 //interface sirve para desacoplar la capa de datos del ViewModel en caso de que cambiara el SharePreferences pues el ViewModel no se veria afectado
 interface InterfazConexion {
