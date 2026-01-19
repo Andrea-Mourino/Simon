@@ -51,5 +51,7 @@ Ahora que ya tenemos los permisos volvemos al chat de Copilot y le pedimos que r
 
 Si no hay ningun error deberia de verse ya en nuestro repo lo Issues creados correctamente.
 
+<img width="1517" height="769" alt="image" src="https://github.com/user-attachments/assets/ea3dfa3a-bbe3-4dde-89a3-95c08acdc1d4" />
+
 
 
