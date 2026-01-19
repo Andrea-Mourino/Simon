@@ -1,0 +1,2 @@
+- Haz los mensajes de commit en español
+- Escribe siempre un mensaje corto y luego una descripción más extensa
