@@ -9,6 +9,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.room.Room
 import com.example.simon.room.AppDatabase
 import com.example.simon.room.Entity
+import com.example.simon.room.ScoreEntity
+import com.example.simon.room.UserEntity
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -26,6 +28,11 @@ class MyViewModel(application: Application) : AndroidViewModel(application) {
     var _colorActivo: MutableStateFlow<Int> = MutableStateFlow(-1)
     var _colorPulsado: MutableStateFlow<Int> = MutableStateFlow(-1)
 
+    var _jugador: MutableStateFlow<String> = MutableStateFlow("Player1")
+
+    var _recordUser: MutableStateFlow<Int> = MutableStateFlow(0)
+
+
     // Audio
     private val tone = ToneGenerator(AudioManager.STREAM_MUSIC, 100)
 
@@ -38,6 +45,14 @@ class MyViewModel(application: Application) : AndroidViewModel(application) {
     private val recordDao = db.Dao()
 
     init {
+        val rnds = (1..2).random()
+        if (rnds == 1) {
+            _jugador.value = "Player1"
+
+        } else {
+            _jugador.value = "Player2"
+        }
+
         Log.d(TAG_LOG, "Inicializamos ViewModel - Estado: ${estadoActual.value}")
     }
 
@@ -141,17 +156,28 @@ class MyViewModel(application: Application) : AndroidViewModel(application) {
      */
     private fun comprobarGuardarRecord(puntuacionActual: Int) {
         viewModelScope.launch {
-            try {
-                val bestRecord = recordDao.getBestRecord()
-                val recordValue = bestRecord?.record ?: 0
-                Log.d(TAG_LOG, "Record actual: $recordValue")
 
-                if (puntuacionActual > recordValue) {
-                    val newRecord = Entity(
-                        record = puntuacionActual,
-                        fecha = System.currentTimeMillis()
+            try {
+                val newUser = UserEntity(
+                    id = 0,
+                    name = _jugador.value
+                )
+                recordDao.insertUser( newUser)
+                val bestRecord = recordDao.getBestGlobalScore()
+                val recordValue = bestRecord?.score
+                Log.d(TAG_LOG, "Record actual: $recordValue")
+                if (puntuacionActual > (recordValue ?: 0)) {
+                    val newRecord = ScoreEntity(
+                        id = 0,
+                        score = puntuacionActual,
+                        time = "00:00", // Placeholder, se puede mejorar para calcular el tiempo real
+                        timestamp = System.currentTimeMillis(),
+                        userId =newUser.id
                     )
-                    recordDao.insertRecord(newRecord)
+                    recordDao.insertScore(newRecord)
+                    val puntuacionMaxUser = recordDao.getBestScoreForUser(newUser.id)?.score ?: 0
+                    _recordUser.value = puntuacionMaxUser
+
                     Log.d(TAG_LOG, "¡Nuevo record guardado! $puntuacionActual")
                 } else {
                     Log.d(TAG_LOG, "No superó el record: $recordValue")
