@@ -26,6 +26,9 @@ import android.util.Log
 fun IU(miViewModel: MyViewModel) {
 
     val ronda by miViewModel._ronda.collectAsState()
+    val jugador by miViewModel._jugador.collectAsState()
+    val recordUser by miViewModel._recordUser.collectAsState()
+
 
     Box(
         modifier = Modifier
@@ -53,6 +56,9 @@ fun IU(miViewModel: MyViewModel) {
             }
 
             Text(text = "Ronda Nº: $ronda", color = Color.Green)
+
+            Text(text = "Jugador: $jugador", color = Color.Cyan)
+            Text(text = "Record: $recordUser", color = Color.Yellow)
 
             Boton_Start(miViewModel, Colores.CLASE_START)
         }

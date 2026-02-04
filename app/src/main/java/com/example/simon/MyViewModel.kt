@@ -1,16 +1,25 @@
-package com.example.simon;
+package com.example.simon
 
-import android.util.Log
-import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.launch
+import android.app.Application
 import android.media.AudioManager
 import android.media.ToneGenerator
-class MyViewModel(): ViewModel() {
+import android.util.Log
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.room.Room
+import com.example.simon.room.AppDatabase
+import com.example.simon.room.Entity
+import com.example.simon.room.ScoreEntity
+import com.example.simon.room.UserEntity
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
+
+class MyViewModel(application: Application) : AndroidViewModel(application) {
 
     private val TAG_LOG = "miDebug"
+
+    // Estado del juego
     val estadoActual = MutableStateFlow(GameState.INICIO)
     var _listaSecuencia = MutableStateFlow<List<Int>>(emptyList())
     var _numbers = MutableStateFlow(0)
@@ -18,147 +27,100 @@ class MyViewModel(): ViewModel() {
     var _ronda = MutableStateFlow(0)
     var _colorActivo: MutableStateFlow<Int> = MutableStateFlow(-1)
     var _colorPulsado: MutableStateFlow<Int> = MutableStateFlow(-1)
-    val tone = ToneGenerator(AudioManager.STREAM_MUSIC, 100)
 
+    var _jugador: MutableStateFlow<String> = MutableStateFlow("Player1")
+
+    var _recordUser: MutableStateFlow<Int> = MutableStateFlow(0)
+
+
+    // Audio
+    private val tone = ToneGenerator(AudioManager.STREAM_MUSIC, 100)
+
+    // Room
+    private val db: AppDatabase = Room.databaseBuilder(
+        application,
+        AppDatabase::class.java,
+        "simon_records_db"
+    ).build()
+    private val recordDao = db.Dao()
 
     init {
+        val rnds = (1..2).random()
+        if (rnds == 1) {
+            _jugador.value = "Player1"
+
+        } else {
+            _jugador.value = "Player2"
+        }
+
         Log.d(TAG_LOG, "Inicializamos ViewModel - Estado: ${estadoActual.value}")
     }
 
-    /**
-     *
-     *  -----------------------------------------------------------------------------------------------------
-     *  En este programa hay varias clases muy simples que a veces incluso solo suman 1 a alguna
-     *  variable. Decidí separarlo así en vez de juntarlo para que sea mucho mas visual, legible y ordenado;
-     *  además, se pueden detectar errores con una sorprendentemente mayor eficacia
-     * -----------------------------------------------------------------------------------------------------
-     *
-     */
+    // ----------------------- FUNCIONES DEL JUEGO -----------------------
 
-
-    /**
-     * Esta funcion se dedica a crear el siguiente numero/color de la secuencia
-     * lo realiza con un random y utilizamos numeros del 0 al 3
-     */
     fun generarNNuevo() {
         estadoActual.value = GameState.GENERANDO
-        _numbers.value = (0..3).random() //creamos el numero
+        _numbers.value = (0..3).random()
         Log.d(TAG_LOG, "creamos random ${_numbers.value} - Estado: ${estadoActual.value}")
         setNNuevo(_numbers.value)
     }
 
-    /**
-     * En esta función se van mostrando los colores cambiando
-     * el valor de la variable _colorActivo y antes cambiando
-     * el estado
-     */
-    suspend fun mostrarColores(){
-        _colorActivo.value = -1 // con -1 hacemos que ningun color se vea
+    private suspend fun mostrarColores() {
+        _colorActivo.value = -1
         delay(200)
-        for (color in _listaSecuencia.value) { //recorremos la secuencia
-            //vamos igualando el color activo con el que toca de la secuencia
-            //así desde la view sabrá que botón mostar
+        for (color in _listaSecuencia.value) {
             _colorActivo.value = color
-            hacerSonido(_colorActivo.value) //sonido del boton correspondiente
+            hacerSonido(_colorActivo.value)
             delay(500)
-            _colorActivo.value = -1 //volvemos a dejar su valor base
+            _colorActivo.value = -1
             delay(200)
         }
         estadoActual.value = GameState.ADIVINANDO
         Log.d(TAG_LOG, "Tu turno - Estado: ${estadoActual.value}")
     }
 
-    /**
-     * En esta funcion actualizamos la secuencia
-     * @param numero: metemos el nuevo numero de la secuencia
-     */
     fun setNNuevo(numero: Int) {
-        Log.d(TAG_LOG, "actualizamos numero en Datos - Estado: ${estadoActual.value}")
-        _listaSecuencia.value += numero //añadimos el color a la secuencia
-        Log.d(TAG_LOG, "chuleta: ${_listaSecuencia.value}")
+        _listaSecuencia.value += numero
         estadoActual.value = GameState.MOSTRANDO
-        Log.d(TAG_LOG, "MOSTRANDO COLORESS - Estado: ${estadoActual.value}")
-        viewModelScope.launch {
-            mostrarColores() //empezamos a mostrar la secuencia
-        }
+        viewModelScope.launch { mostrarColores() }
     }
 
-    /**
-     * Cuando se pulsa un boton se ejecuta esta funcion
-     * esta comprueba si el color que hemos pulsado coincide con el que toca de la secuencia
-     * (lo hacemos con una lista y su índice)
-     *
-     * llamaremos a la funcion de hacer el sonido que corresponde y comprobaremos si es el ultimo
-     * color de la secuencia en caso de acertar, o reiniciaremos el juego en caso de fallar
-     *
-     * @param numeroAdivinar: Es el numero que corresponde el botón pulsado
-     */
     fun comprobar(numeroAdivinar: Int) {
         estadoActual.value = GameState.PULSADO
-        _colorPulsado.value = numeroAdivinar //color pulsado
-        if (numeroAdivinar == _listaSecuencia.value[_nSecuenciaActual.value]) { //vemos si el pulsado es igual al color actual
-            Log.d(TAG_LOG, "adivinaste - Estado: ${estadoActual.value}")
-            viewModelScope.launch { //en caso de que sea
-                hacerSonido(_colorPulsado.value) //hacemos el sonido
+        _colorPulsado.value = numeroAdivinar
+
+        if (numeroAdivinar == _listaSecuencia.value[_nSecuenciaActual.value]) {
+            viewModelScope.launch {
+                hacerSonido(_colorPulsado.value)
                 delay(200)
-                setnSecuencia() //comprobamos el numero de la secuencia
+                setnSecuencia()
             }
-        } else { //en caso de fallar
-            hacerSonido(-1) //sonido de fallo
+        } else {
+            hacerSonido(-1)
             estadoActual.value = GameState.REINICIANDO
-            reiniciarJuego() //reiniciamos juego
+            reiniciarJuego()
         }
     }
 
-    /**
-     * Esta funcion comprueba si el numero actual de la secuencia ya es el ultimo de esta,
-     * yo lo compruebo comparandolo con el numero de ronda ya que coincide siempre.
-     *
-     * Si el numero es el ultimo, llamamos la funcion setRonda()
-     * Si el numero NO es el último, pasamos al siguiente numero de la funcion
-     */
-    fun setnSecuencia(){
-        if (_nSecuenciaActual.value == _ronda.value){ //si es el numero final de la secuencia
-            _nSecuenciaActual.value = 0 //volvemos al principio de la secuencia
+    fun setnSecuencia() {
+        if (_nSecuenciaActual.value == _ronda.value) {
+            _nSecuenciaActual.value = 0
             setRonda()
         } else {
             estadoActual.value = GameState.ADIVINANDO
-            Log.d(TAG_LOG, "dime el siguiente numero - Estado: ${estadoActual.value}")
-            _nSecuenciaActual.value ++ //pasamos al siguiente numero
+            _nSecuenciaActual.value++
         }
     }
 
-    /**
-     * Aumentamos el valor de la ronda y llamamos a la funcion generarNNuevo para
-     * que cree el siguiente color aleatorio de la secuencia
-     */
-    fun setRonda(){
+    fun setRonda() {
         estadoActual.value = GameState.GENERANDO
-        Log.d(TAG_LOG, "avanzando a la siguiente ronda - Estado: ${estadoActual.value}")
-        _ronda.value ++ //aumentamos la ronda
+        _ronda.value++
         generarNNuevo()
     }
 
-    /**
-     * Una funcion para simular que el juego se reinicia, simplemente vuelvo a poner los
-     * valores base de las variables y cambio el estado a inicio
-     */
-    fun reiniciarJuego(){
-        Log.d(TAG_LOG, "fallaste,has perdido, reiniciando - Estado: ${estadoActual.value}")
-        Log.d(TAG_LOG, "nivel alcanzado: ${_ronda.value}")
+    // ----------------------- FUNCIONES DE AUDIO -----------------------
 
-        _listaSecuencia.value = emptyList() //vaciamos la secuencia
-        _nSecuenciaActual.value = 0
-        _ronda.value = 0
-        estadoActual.value = GameState.INICIO
-    }
-
-    /**
-     * Segun el color que elijamos hace un sonido
-     * Si no se elige uno valido por defecto suena el de error
-     * @param color: Se pasa el numero
-     */
-    fun hacerSonido(color: Int){
+    fun hacerSonido(color: Int) {
         when (color) {
             0 -> sonidoDo()
             1 -> sonidoMi()
@@ -168,28 +130,61 @@ class MyViewModel(): ViewModel() {
         }
     }
 
-    fun sonidoDo() {
-        Log.d(TAG_LOG, "Pulsado Do agudo")
-        tone.startTone(ToneGenerator.TONE_DTMF_1, 200)
+    private fun sonidoDo() = tone.startTone(ToneGenerator.TONE_DTMF_1, 200)
+    private fun sonidoMi() = tone.startTone(ToneGenerator.TONE_DTMF_3, 200)
+    private fun sonidoSol() = tone.startTone(ToneGenerator.TONE_DTMF_7, 200)
+    private fun sonidoDoGrave() = tone.startTone(ToneGenerator.TONE_DTMF_9, 200)
+    private fun sonidoError() = tone.startTone(ToneGenerator.TONE_CDMA_CALL_SIGNAL_ISDN_INTERGROUP, 300)
+
+    // ----------------------- FUNCIONES DE RECORD -----------------------
+
+    fun reiniciarJuego() {
+        Log.d(TAG_LOG, "fallaste, has perdido - Nivel alcanzado: ${_ronda.value}")
+
+        // Comprobamos record antes de reiniciar
+        comprobarGuardarRecord(_ronda.value)
+
+        // Reinicio de variables
+        _listaSecuencia.value = emptyList()
+        _nSecuenciaActual.value = 0
+        _ronda.value = 0
+        estadoActual.value = GameState.INICIO
     }
 
-    fun sonidoMi() {
-        Log.d(TAG_LOG, "Pulsado Mi")
-        tone.startTone(ToneGenerator.TONE_DTMF_3, 200)
-    }
+    /**
+     * Función que comprueba el record actual y guarda uno nuevo si se supera
+     */
+    private fun comprobarGuardarRecord(puntuacionActual: Int) {
+        viewModelScope.launch {
 
-    fun sonidoSol() {
-        Log.d(TAG_LOG, "Pulsado Sol")
-        tone.startTone(ToneGenerator.TONE_DTMF_7, 200)
-    }
+            try {
+                val newUser = UserEntity(
+                    id = 0,
+                    name = _jugador.value
+                )
+                recordDao.insertUser( newUser)
+                val bestRecord = recordDao.getBestGlobalScore()
+                val recordValue = bestRecord?.score
+                Log.d(TAG_LOG, "Record actual: $recordValue")
+                if (puntuacionActual > (recordValue ?: 0)) {
+                    val newRecord = ScoreEntity(
+                        id = 0,
+                        score = puntuacionActual,
+                        time = "00:00", // Placeholder, se puede mejorar para calcular el tiempo real
+                        timestamp = System.currentTimeMillis(),
+                        userId =newUser.id
+                    )
+                    recordDao.insertScore(newRecord)
+                    val puntuacionMaxUser = recordDao.getBestScoreForUser(newUser.id)?.score ?: 0
+                    _recordUser.value = puntuacionActual
 
-    fun sonidoDoGrave() {
-        Log.d(TAG_LOG, "Pulsado Do grave")
-        tone.startTone(ToneGenerator.TONE_DTMF_9, 200)
-    }
-
-    fun sonidoError() {
-        Log.d(TAG_LOG, "Sonido de error")
-        tone.startTone(ToneGenerator.TONE_CDMA_CALL_SIGNAL_ISDN_INTERGROUP, 300)
+                    Log.d(TAG_LOG, "¡Nuevo record guardado! $puntuacionActual")
+                } else {
+                    Log.d(TAG_LOG, "No superó el record: $recordValue")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG_LOG, "Error accediendo a la base de datos: ${e.message}")
+            }
+        }
     }
 }
