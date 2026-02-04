@@ -26,6 +26,7 @@ import android.util.Log
 fun IU(miViewModel: MyViewModel) {
 
     val ronda by miViewModel._ronda.collectAsState()
+    val playerName by miViewModel.recordPlayerName.collectAsState()
 
     Box(
         modifier = Modifier
@@ -51,9 +52,9 @@ fun IU(miViewModel: MyViewModel) {
                     Boton(miViewModel, Colores.CLASE_AMARILLO)
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)){
-                    Text(text = "Record: ${miViewModel.record.value}")
+                    Text(text = "Record: ${miViewModel.record.value} (${playerName})")
                     Spacer(modifier = Modifier.width(10.dp))
-                    Text(text = "Fecha: ${miViewModel.recordFecha.value}")  //muestra el record actual en pantalla
+                    Text(text = "Fecha: ${miViewModel.recordFecha.value}")  //muestra el record actual con el nombre del jugador
 
                 }
             }

@@ -10,6 +10,7 @@ object ControllerSQLite: InterfazConexion {
 
     override fun actualizarRecord(
         record: Int,
+        playerName: String,
         context: Context
     ): Record {
         TODO("Not yet implemented")

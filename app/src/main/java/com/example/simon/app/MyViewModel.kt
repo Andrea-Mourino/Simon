@@ -15,8 +15,12 @@ import kotlin.collections.plusAssign
 
 class MyViewModel(application: Application): AndroidViewModel(application) { //permite acceder a getAppication
 
+    // Variable para el nombre del jugador (se puede cambiar el valor)
+    private val playerName = "Andrés"
+
     var record = MutableStateFlow(0) //Guarda y expone el record actual al UI usando StateFlow
     var recordFecha = MutableStateFlow(LocalDate.now()) //Guarda y expone la fecha usando StateFlow
+    var recordPlayerName = MutableStateFlow("Jugador") //Guarda y expone el nombre del jugador
     private val TAG_LOG = "miDebug"
     val estadoActual = MutableStateFlow(GameState.INICIO)
     var _listaSecuencia = MutableStateFlow<List<Int>>(emptyList())
@@ -33,15 +37,17 @@ class MyViewModel(application: Application): AndroidViewModel(application) { //p
         val recordGuardado = RoomController.obtenerRecord(getApplication())
         record.value = recordGuardado.record
         recordFecha.value = recordGuardado.date
+        recordPlayerName.value = recordGuardado.playerName
     }
     fun comprobarRecord(ronda:Int){
         val recordActual = RoomController.obtenerRecord(getApplication())
         Log.d(TAG_LOG, "Ronda alcanzada: $ronda - Record actual: ${recordActual.record}")
         //Se comprueba si la ronda superada es mejor que el record
         if(ronda > recordActual.record){
-            val nuevoRecord = RoomController.actualizarRecord(ronda, getApplication())
+            val nuevoRecord = RoomController.actualizarRecord(ronda, playerName, getApplication())
             record.value = nuevoRecord.record
             recordFecha.value = nuevoRecord.date //si la ronda supera el record esta actualiza SharedPreferences
+            recordPlayerName.value = nuevoRecord.playerName
         }
     }
 
