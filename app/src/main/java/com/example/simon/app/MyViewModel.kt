@@ -36,6 +36,7 @@ class MyViewModel(application: Application): AndroidViewModel(application) { //p
     }
     fun comprobarRecord(ronda:Int){
         val recordActual = RoomController.obtenerRecord(getApplication())
+        Log.d(TAG_LOG, "Ronda alcanzada: $ronda - Record actual: ${recordActual.record}")
         //Se comprueba si la ronda superada es mejor que el record
         if(ronda > recordActual.record){
             val nuevoRecord = RoomController.actualizarRecord(ronda, getApplication())
