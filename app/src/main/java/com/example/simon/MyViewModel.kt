@@ -176,7 +176,7 @@ class MyViewModel(application: Application) : AndroidViewModel(application) {
                     )
                     recordDao.insertScore(newRecord)
                     val puntuacionMaxUser = recordDao.getBestScoreForUser(newUser.id)?.score ?: 0
-                    _recordUser.value = puntuacionMaxUser
+                    _recordUser.value = puntuacionActual
 
                     Log.d(TAG_LOG, "¡Nuevo record guardado! $puntuacionActual")
                 } else {
