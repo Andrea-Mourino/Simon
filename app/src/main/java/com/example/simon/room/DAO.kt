@@ -12,4 +12,5 @@ interface Dao {
 
     @Insert
     suspend fun insertRecord(record: Entity)
+
 }
