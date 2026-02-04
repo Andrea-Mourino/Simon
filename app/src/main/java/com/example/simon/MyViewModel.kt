@@ -29,17 +29,23 @@ class MyViewModel(application: Application): AndroidViewModel(application) { //p
 
     init {
         Log.d(TAG_LOG, "Inicializamos ViewModel - Estado: ${estadoActual.value}")
-        val recordGuardado = ControllerShared.obtenerRecord(getApplication())
+        val recordGuardado = ControllerSQLite.obtenerRecord(getApplication())
         record.value = recordGuardado.record
         recordFecha.value = recordGuardado.date
     }
-    fun comprobarRecord(ronda:Int){
-        val recordActual = ControllerShared.obtenerRecord(getApplication())
-        //Se comprueba si la ronda superada es mejor que el record
-        if(ronda > recordActual.record){
-            val nuevoRecord = ControllerShared.actualizarRecord(ronda, getApplication())
-            record.value = nuevoRecord.record
-            recordFecha.value = nuevoRecord.date //si la ronda supera el record esta actualiza SharedPreferences
+    fun comprobarRecord(ronda: Int) {
+        // Guardamos SIEMPRE el resultado al acabar la partida
+        ControllerSQLite.actualizarRecord(ronda, getApplication())
+
+        // Actualizamos el récord máximo en la UI
+        val recordActual = ControllerSQLite.obtenerRecord(getApplication())
+        record.value = recordActual.record
+        recordFecha.value = recordActual.date
+
+        // Verificar si el resultado está en el top 10
+        val posicion = ControllerSQLite.verificarSiEstáEnTop10(ronda, getApplication())
+        if (posicion != -1) {
+            Log.d(TAG_LOG, "¡Nuevo resultado en el top 10! Posición: $posicion - Puntuación: $ronda")
         }
     }
 
@@ -109,7 +115,7 @@ class MyViewModel(application: Application): AndroidViewModel(application) { //p
      * llamaremos a la funcion de hacer el sonido que corresponde y comprobaremos si es el ultimo
      * color de la secuencia en caso de acertar, o reiniciaremos el juego en caso de fallar
      *
-     * @param numeroAdivinar: Es el numero que corresponde el botón pulsado
+     *
      */
     fun comprobar(numeroAdivinar: Int) {
         estadoActual.value = GameState.PULSADO
