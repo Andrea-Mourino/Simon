@@ -26,7 +26,7 @@ import android.util.Log
 fun IU(miViewModel: MyViewModel) {
 
     val ronda by miViewModel._ronda.collectAsState()
-
+    val recordMax  by miViewModel._ELRECORD.collectAsState()
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -53,6 +53,7 @@ fun IU(miViewModel: MyViewModel) {
             }
 
             Text(text = "Ronda Nº: $ronda", color = Color.Green)
+            Text(text = "Record Máximo: $recordMax", color = Color.Yellow)
 
             Boton_Start(miViewModel, Colores.CLASE_START)
         }

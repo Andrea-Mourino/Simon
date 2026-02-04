@@ -1,5 +1,7 @@
 package com.example.simon;
 
+import android.app.Application
+import android.icu.text.SimpleDateFormat
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.delay
@@ -8,8 +10,30 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import android.media.AudioManager
 import android.media.ToneGenerator
-class MyViewModel(): ViewModel() {
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.AndroidViewModel
+import com.example.simon.sqlite.SimonDatabaseHelper
+import java.util.Date
+import java.util.Locale
 
+class MyViewModel(application: Application) : AndroidViewModel(application) {
+    /**
+     * sqlite
+     */
+    private val dbHelper = SimonDatabaseHelper(application)
+    // FECHA DEL RÉCORD ACTUAL
+    var fechaRecord by mutableStateOf("")
+    // MOSTRAR LISTA DE USUARIOS DESDE SQLITE
+    var listaUsuariosTexto by mutableStateOf("CARGANDO USUARIOS...")
+    var recordEnMemoria by mutableStateOf(0)
+    var recordEnMemoriaMin by mutableStateOf(0)
+    var _ELRECORD = MutableStateFlow(0)
+
+    /**
+     *
+     */
     private val TAG_LOG = "miDebug"
     val estadoActual = MutableStateFlow(GameState.INICIO)
     var _listaSecuencia = MutableStateFlow<List<Int>>(emptyList())
@@ -21,10 +45,65 @@ class MyViewModel(): ViewModel() {
     val tone = ToneGenerator(AudioManager.STREAM_MUSIC, 100)
 
 
+    /**
+     * las cosas del sqlite
+     */
     init {
-        Log.d(TAG_LOG, "Inicializamos ViewModel - Estado: ${estadoActual.value}")
+        // AL CARGAR EL VIEWMODEL, BUSCAMOS EL RÉCORD MÁXIMO EN LA BASE DE DATOS SQLITE
+        recordEnMemoria = dbHelper.obtenerMaximoRecord()
+        recordEnMemoriaMin = dbHelper.obtenerMinimoPuntuacion()
+        _ELRECORD.value = recordEnMemoria
+        fechaRecord = dbHelper.obtenerFechaDelRecord(recordEnMemoria)
+        inicializarDatosPrueba()
+        actualizarListaUsuariosUI()
+        val pruebaId = dbHelper.obtenerRecordPorId(1)
+        // Log.d("SQLITE_SIMON", "DATOS CARGADOS AL INICIO: Récord $recordEnMemoria ($fechaRecord)")
+        Log.d("SQLITE_SIMON", "Prueba getRecordById(1): $pruebaId")
+        Log.d("SQLITE_SIMON", "Prueba getMax: $recordEnMemoria")
+
+    }
+    private fun actualizarRecord() {
+        // VERIFICAMOS SI LA RONDA ACTUAL SUPERA EL RÉCORD HISTÓRICO
+        if (_ronda.value > recordEnMemoriaMin) {
+            Log.d("SQLITE_SIMON", "ESTAS ENTRE LOS 10 PRIMEROS CRACK")
+            // GENERAMOS LA FECHA Y HORA DEL MOMENTO ACTUAL
+            val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+            val fechaActual = sdf.format(Date())
+            fechaRecord = fechaActual
+
+            // GUARDAMOS EL NUEVO RÉCORD Y LA FECHA EN LA TABLA SQLITE
+            dbHelper.insertarRecord(_ronda.value, fechaActual)
+            if (dbHelper.obtenerTodosLosRecord().size==10){
+                val MasBajo = dbHelper.obtenerMinimoRecord(dbHelper.obtenerMinimoPuntuacion())
+                dbHelper.borrarRecordPorId(MasBajo)
+            }
+        }
+    }
+    private fun inicializarDatosPrueba() {
+        val usuarios = dbHelper.obtenerTodosLosUsuarios()
+        if (usuarios.isEmpty()) {
+            dbHelper.insertarUsuario("TESTER 1")
+            dbHelper.insertarUsuario("PROFE 1")
+            Log.d("SQLITE_SIMON", "Datos de prueba insertados en tabla_usuarios")
+        }
+    }
+    fun actualizarListaUsuariosUI() {
+        val lista = dbHelper.obtenerTodosLosUsuarios()
+        // CONVERTIMOS LA LISTA [Usuario(1, "Pepe"), Usuario(2, "Juan")] EN ["1: Pepe", "2: Juan"] A STRING
+        listaUsuariosTexto = if (lista.isNotEmpty()) lista.joinToString("\n") else "Sin usuarios"
+    }
+    // AGREGA UN USUARIO
+    fun registrarUsuarioNuevo(nombre: String) {
+        dbHelper.insertarUsuario(nombre)
+        actualizarListaUsuariosUI() // REFRESCAMOS LA LISTA
     }
 
+    fun eliminarUsuario(id: Int) {
+        val borrados = dbHelper.borrarUsuarioPorId(id)
+        if (borrados > 0) {
+            actualizarListaUsuariosUI() // REFRESCAMOS PANTALLA
+        }
+    }
     /**
      *
      *  -----------------------------------------------------------------------------------------------------
@@ -105,6 +184,7 @@ class MyViewModel(): ViewModel() {
             }
         } else { //en caso de fallar
             hacerSonido(-1) //sonido de fallo
+            actualizarRecord()
             estadoActual.value = GameState.REINICIANDO
             reiniciarJuego() //reiniciamos juego
         }

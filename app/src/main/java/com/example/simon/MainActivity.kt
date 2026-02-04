@@ -6,12 +6,13 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.example.simon.ui.theme.SimonTheme
 
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        enableEdgeToEdge() // Note 1: Habilita el modo edge-to-edge para aprovechar toda la pantalla en dispositivos modernos.
         // inicializamos ViewModel
-        val miViewModel: MyViewModel = MyViewModel()
+        val miViewModel: MyViewModel = MyViewModel(application)
 
         enableEdgeToEdge()
         setContent {
