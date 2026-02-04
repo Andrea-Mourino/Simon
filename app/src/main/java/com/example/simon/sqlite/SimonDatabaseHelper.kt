@@ -100,7 +100,47 @@ class SimonDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE
         // DEVOLVEMOS EL RÉCORD ENCONTRADO O 0 SI NO HABÍA NADA
         return maxRonda
     }
+    fun obtenerMinimoRecord(puntuacion: Int): Int {
 
+        // ABRIMOS LA BD EN MODO LECTURA
+        val db = this.readableDatabase
+
+        // DEFINIMOS LA QUERY, PEDIMOS LA COLUMNA FECHA DE LA TABLA RECORDS DONDE LA RONDA COINCIDA CON NUESTRO PARÁMETRO, SI HAY EMPATES TRAEMOS EL ID MÁS ALTO ( REGISTRO MÁS RECIENTE )
+        val query = "SELECT $COLUMN_ID FROM $TABLE_RECORDS WHERE $COLUMN_RONDA = ? ORDER BY $COLUMN_FECHA DESC"
+
+        // EJECUTAMOS LA CONSULTA CON CURSOR
+        val cursor = db.rawQuery(query, arrayOf(puntuacion.toString()))
+
+        // CREAMOS UNA VARIABLE PARA GUARDAR EL RESULTADO
+        var fechaEncontrada = 0
+
+        // INTENTAMOS MOVER EL CURSOR A LA PRIMERA FILA DE RESULTADOS, SI DEVUELVE TRUE ES QUE ENCONTRÓ DATOS
+        if (cursor.moveToFirst()) {
+            // EXTRAEMOS EL VALOR DE LA COLUMNA 0 (LA ÚNICA QUE PEDIMOS EN EL SELECT)
+            fechaEncontrada = cursor.getInt(0)
+        }
+
+        cursor.close()
+        return fechaEncontrada
+    }
+
+    fun obtenerMinimoPuntuacion(): Int {
+        // OBTENEMOS LA BASE DE DATOS EN MODO LECTURA
+        val db = this.readableDatabase
+        // REALIZAMOS UNA CONSULTA SQL PARA BUSCAR EL VALOR MÁXIMO DE LA COLUMNA RONDA
+        val cursor = db.rawQuery("SELECT MIN($COLUMN_RONDA) FROM $TABLE_RECORDS", null)
+
+        var maxRonda = 0
+        // SI EL CURSOR TIENE RESULTADOS, ACCEDEMOS AL PRIMERO
+        if (cursor.moveToFirst()) {
+            // EL RESULTADO ESTÁ EN LA POSICIÓN 0 DE LA CONSULTA
+            maxRonda = cursor.getInt(0)
+        }
+        // CERRAMOS EL CURSOR PARA EVITAR FUGAS DE MEMORIA (MEMORY LEAKS)
+        cursor.close()
+        // DEVOLVEMOS EL RÉCORD ENCONTRADO O 0 SI NO HABÍA NADA
+        return maxRonda
+    }
     fun obtenerFechaDelRecord(puntuacion: Int): String {
 
         // ABRIMOS LA BD EN MODO LECTURA
@@ -158,6 +198,30 @@ class SimonDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE
         return listaUsuarios
     }
 
+    fun obtenerTodosLosRecord(): List<String>{
+
+        // SE CREA LA LISTA DE USUARIOS A DEVOLVER
+        val listaRecord = ArrayList<String>()
+
+        // INSTANCIAMOS LA BASE DE DATOS EN MODO LECTURA
+        val db = this.readableDatabase
+
+        // REALIZAMOS LA CONSULTA PARA OBTENER TODOS LOS USUARIOS
+        val cursor = db.rawQuery("SELECT * FROM $TABLE_RECORDS", null)
+
+        // RECORREMOS EL CURSOR Y AÑADIMOS CADA USUARIO A LA LISTA
+        if (cursor.moveToFirst()){
+            do {
+                val puntuaci = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_RONDA))
+                val id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID))
+                val fecha = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_FECHA))
+                listaRecord.add("$id: $puntuaci")
+            } while (cursor.moveToNext())
+        }
+        cursor.close()
+        return listaRecord
+    }
+
 
     // MÉTODO PARA OBTENER UN RÉCORD COMPLETO (RONDA Y FECHA) A PARTIR DE SU ID
     fun obtenerRecordPorId(id: Int): String {
@@ -190,6 +254,28 @@ class SimonDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE
         // LOGUEAMOS EL RESULTADO
         if (filasAfectadas > 0) {
             Log.d("SQLITE_SIMON", "USUARIO CON ID: $id ELIMINADO.")
+        } else {
+            Log.e("SQLITE_SIMON", "NO SE PUDO BORRAR")
+        }
+
+        db.close()
+        return filasAfectadas
+    }
+
+    fun borrarRecordPorId(id: Int): Int {
+
+        // ABRIMOS LA BD EN MODO ESCRITURA
+        val db = this.writableDatabase
+
+        val whereClause = "$COLUMN_ID = ?"
+        val whereArgs = arrayOf(id.toString())
+
+        // EJECUUAMOS EL BORRADO Y OBTENEMOS EL NÚMERO DE FILAS AFECTADAS
+        val filasAfectadas = db.delete(TABLE_RECORDS, whereClause, whereArgs)
+
+        // LOGUEAMOS EL RESULTADO
+        if (filasAfectadas > 0) {
+            Log.d("SQLITE_SIMON", "RECORD CON ID: $id ELIMINADO.")
         } else {
             Log.e("SQLITE_SIMON", "NO SE PUDO BORRAR")
         }

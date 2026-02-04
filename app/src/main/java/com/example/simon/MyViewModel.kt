@@ -28,6 +28,9 @@ class MyViewModel(application: Application) : AndroidViewModel(application) {
     // MOSTRAR LISTA DE USUARIOS DESDE SQLITE
     var listaUsuariosTexto by mutableStateOf("CARGANDO USUARIOS...")
     var recordEnMemoria by mutableStateOf(0)
+    var recordEnMemoriaMin by mutableStateOf(0)
+    var _ELRECORD = MutableStateFlow(0)
+
     /**
      *
      */
@@ -48,27 +51,32 @@ class MyViewModel(application: Application) : AndroidViewModel(application) {
     init {
         // AL CARGAR EL VIEWMODEL, BUSCAMOS EL RÉCORD MÁXIMO EN LA BASE DE DATOS SQLITE
         recordEnMemoria = dbHelper.obtenerMaximoRecord()
+        recordEnMemoriaMin = dbHelper.obtenerMinimoPuntuacion()
+        _ELRECORD.value = recordEnMemoria
         fechaRecord = dbHelper.obtenerFechaDelRecord(recordEnMemoria)
         inicializarDatosPrueba()
         actualizarListaUsuariosUI()
         val pruebaId = dbHelper.obtenerRecordPorId(1)
         // Log.d("SQLITE_SIMON", "DATOS CARGADOS AL INICIO: Récord $recordEnMemoria ($fechaRecord)")
         Log.d("SQLITE_SIMON", "Prueba getRecordById(1): $pruebaId")
-        Log.d("SQLITE_SIMON", "Prueba getRecordById(1): $recordEnMemoria")
+        Log.d("SQLITE_SIMON", "Prueba getMax: $recordEnMemoria")
 
     }
     private fun actualizarRecord() {
         // VERIFICAMOS SI LA RONDA ACTUAL SUPERA EL RÉCORD HISTÓRICO
-        if (_ronda.value > recordEnMemoria) {
-            recordEnMemoria = _ronda.value
-
+        if (_ronda.value > recordEnMemoriaMin) {
+            Log.d("SQLITE_SIMON", "ESTAS ENTRE LOS 10 PRIMEROS CRACK")
             // GENERAMOS LA FECHA Y HORA DEL MOMENTO ACTUAL
             val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
             val fechaActual = sdf.format(Date())
             fechaRecord = fechaActual
 
             // GUARDAMOS EL NUEVO RÉCORD Y LA FECHA EN LA TABLA SQLITE
-            dbHelper.insertarRecord(recordEnMemoria, fechaActual)
+            dbHelper.insertarRecord(_ronda.value, fechaActual)
+            if (dbHelper.obtenerTodosLosRecord().size==10){
+                val MasBajo = dbHelper.obtenerMinimoRecord(dbHelper.obtenerMinimoPuntuacion())
+                dbHelper.borrarRecordPorId(MasBajo)
+            }
         }
     }
     private fun inicializarDatosPrueba() {
