@@ -28,6 +28,7 @@ Basándote en las directrices del archivo .github/copilot-instructions.md, ayúd
 
 El resultado:
 ```
+
 # Plan de Integración de MongoDB - Issues
 
 ## Issue 1: Crear interfaz `ScoreDataSource` para abstraer fuentes de datos
