@@ -1,95 +1,87 @@
-# Simon - Android App (Alexandre Sinisterra & Andrea Mouriño)
+# Planificación: Integración de MongoDB en Simón Dice (MVVM)
 
-## Descripción del proyecto
+## 🤖 Configuración del Asistente IA (GitHub Copilot)
+Para la planificación y desarrollo de esta tarea, se ha utilizado GitHub Copilot. Para darle el contexto adecuado sobre la arquitectura del proyecto, se ha creado un archivo de configuración a nivel de repositorio.
 
-Simon Game es una implementación del clásico juego de memoria “Simon” para Android, desarrollado usando **Jetpack Compose** y **MVVM**.
-El juego presenta al usuario una secuencia de colores que debe memorizar y repetir. Cada ronda agrega un color nuevo a la secuencia, aumentando la dificultad progresivamente. El juego ofrece **retroalimentación visual y sonora** en tiempo real para cada acción.
+Se ha añadido el archivo `.github/copilot-instructions.md` con las siguientes directrices para la IA:
+1. **Contexto:** Se le ha indicado que es una app nativa en Kotlin siguiendo la arquitectura **MVVM**.
+2. **Objetivo:** Añadir persistencia en MongoDB sin eliminar las estructuras actuales de `SharedPreferences` y `SQLite`.
+3. **Rol:** Se le ha pedido que actúe como un Tech Lead, dividiendo el trabajo en tareas (Issues) pequeñas, respetando los principios SOLID y el Patrón Repositorio para que la Vista (UI) quede totalmente desacoplada de la base de datos.
 
-### Características principales
+## 📋 Issues Planificados
+Gracias al contexto proporcionado mediante el archivo de instrucciones, Copilot ha generado una planificación limpia y modular. Los issues creados en este repositorio son:
 
-* Secuencia de colores aleatoria generada por el sistema.
-* Validación de aciertos y fallos con reinicio automático del juego.
-* Indicadores visuales: parpadeo de colores, botones deshabilitados/activados según el estado.
-* Sonido asociado a cada color y retroalimentación sonora de error.
-* Visualización clara de la ronda actual.
+* **#1 Crear interfaz `ScoreDataSource`:** Para abstraer las fuentes de datos (CRUD).
+* **#2 Implementar `MongoDbScoreDataSource`:** Implementación concreta para MongoDB.
+* **#3 Crear `ScoreRepository`:** Capa de abstracción que coordine SharedPreferences, SQLite y Mongo (Patrón Strategy).
+* **#4 Configurar inyección de dependencias:** Configuración de módulos (Hilt/Dagger) para instanciar repositorios y DataSources.
+* **#5 Actualizar ViewModel:** Refactorización para usar el nuevo `ScoreRepository` manteniendo la reactividad.
+* **#6 Implementar sincronización bidireccional:** Lógica para guardar localmente y luego en MongoDB.
+* **#7 Pruebas Unitarias:** Añadir tests para el `ScoreRepository` usando mocks.
+* **#8 Documentación:** Documentar configuración de MongoDB y variables de entorno.
 
----
-
-## Instrucciones de compilación y ejecución
-
-1. **Clonar el repositorio:**
-
-   ```bash
-   git clone <URL_DEL_REPOSITORIO>
-   ```
-
-2. **Abrir el proyecto en Android Studio:**
-
-    * Selecciona *Open an existing Android Studio project*.
-    * Espera a que Gradle sincronice las dependencias.
-
-3. **Ejecutar la app:**
-
-    * Conecta un dispositivo físico o usa un emulador Android.
-    * Haz clic en **Run** y selecciona el dispositivo.
-
-4. **Ejecutar tests unitarios:**
-
-   ```bash
-   ./gradlew test
-   ```
-
-    * Los tests cubren la **lógica del ViewModel**, incluyendo generación de secuencia, verificación de aciertos, fallos y transiciones de estado.
-
----
-
-## Arquitectura del proyecto
-
-El proyecto sigue la arquitectura **MVVM (Model-View-ViewModel)**:
-
-* **Model:** Representado por los enums `Colores` y `GameState`, que contienen la información de colores y estados del juego.
-* **ViewModel (`MyViewModel`):**
-
-    * Controla la **lógica del juego**, incluyendo generación de números aleatorios, manejo de secuencia, validación de aciertos/fallos y gestión de rondas.
-    * Mantiene variables reactivas (`MutableStateFlow`) para que la UI se actualice automáticamente.
-* **View (Compose UI):**
-
-    * `IU()` es el punto central de la interfaz, mostrando botones de colores, botón Start y la ronda actual.
-    * Los botones reflejan el estado actual del juego y muestran colores activos o pulsados.
-
-**Flujo de datos:**
-
+El prompt que he utilizado para generar esta planificación es el siguiente:
+Solamente habría que crear los issues en GitHub con los títulos y descripciones técnicas proporcionadas, asegurándose de asignar las etiquetas correspondientes (ej. "backend", "database", "refactor", "testing") para facilitar la gestión del proyecto.
 ```
-ViewModel -> StateFlow -> UI (Jetpack Compose)
-UI -> eventos de usuario -> ViewModel
+Basándote en las directrices del archivo .github/copilot-instructions.md, ayúdame a planificar la integración de MongoDB. Por favor, divídeme el trabajo en una lista de Issues de GitHub. Cada issue debe tener un título claro y una breve descripción de lo que hay que hacer a nivel técnico (patrón repositorio, inyección de dependencias, etc.
+```
+
+El resultado:
+```
+# Plan de Integración de MongoDB - Issues
+
+## Issue 1: Crear interfaz `ScoreDataSource` para abstraer fuentes de datos
+**Descripción técnica:**
+Implementar una interfaz que defina operaciones CRUD para récords. Esto permitirá desacoplar la lógica de negocio de las implementaciones específicas (SharedPreferences, SQLite, MongoDB).
+
+```kotlin
+interface ScoreDataSource {
+    suspend fun saveScore(score: Score): Result<Unit>
+    suspend fun getTopScores(limit: Int): Result<List<Score>>
+    suspend fun getAllScores(): Result<List<Score>>
+    suspend fun deleteScore(id: String): Result<Unit>
+}
 ```
 
 ---
 
-## Justificación de decisiones de diseño
+## Issue 2: Implementar `MongoDbScoreDataSource`
+**Descripción técnica:**
+Crear la implementación concreta para MongoDB usando Realm SDK o una API REST. Incluir configuración de autenticación y manejo de errores de red.
 
-1. **Separación de lógica y UI:**
+---
 
-    * Toda la lógica reside en `MyViewModel` para facilitar testing y mantener la UI declarativa solo para la presentación.
+## Issue 3: Crear `ScoreRepository` como capa de abstracción
+**Descripción técnica:**
+Implementar un repositorio que coordine múltiples fuentes de datos (SharedPreferences, SQLite, MongoDB). Debe aplicar patrón Strategy para permitir sincronización y caché entre fuentes.
 
-2. **Uso de StateFlow y Compose:**
+---
 
-    * Permite que los cambios de estado se reflejen instantáneamente en la UI sin callbacks complejos.
+## Issue 4: Configurar inyección de dependencias (Hilt/Dagger)
+**Descripción técnica:**
+Crear módulos de inyección que permitan instanciar `ScoreDataSource` y `ScoreRepository` con las dependencias correctas (retrofit, Realm client, etc.).
 
-3. **Enums para colores y estados:**
+---
 
-    * Mejora la legibilidad y permite extender fácilmente los colores o estados sin cambiar la lógica central.
+## Issue 5: Actualizar ViewModel para usar el `ScoreRepository`
+**Descripción técnica:**
+Refactorizar el ViewModel existente para usar el repositorio en lugar de acceder directamente a las fuentes de datos. Mantener la reactivity con Flow/LiveData.
 
-4. **Funciones pequeñas y modulares:**
+---
 
-    * Cada función del ViewModel realiza una única tarea (generar número, mostrar secuencia, comprobar botón), lo que facilita pruebas unitarias y depuración.
+## Issue 6: Implementar sincronización MongoDB ↔ Local
+**Descripción técnica:**
+Crear estrategia de sincronización bidireccional: guardar localmente primero, luego en MongoDB de forma asíncrona. Manejar conflictos y reintentos.
 
-5. **Animaciones y sonidos:**
+---
 
-    * Se decidió usar `animateColorAsState` y `ToneGenerator` directamente para mantener la experiencia de juego simple y reactiva sin librerías externas.
+## Issue 7: Añadir pruebas unitarias para `ScoreRepository`
+**Descripción técnica:**
+Tests usando mocks de las implementaciones de `ScoreDataSource`. Validar lógica de sincronización y manejo de errores.
 
-6. **Testing con alta cobertura:**
+---
 
-    * Todos los cambios de estado y funciones críticas del juego están cubiertos por tests unitarios, garantizando confiabilidad.
-
-
+## Issue 8: Documentar configuración de MongoDB y variables de entorno
+**Descripción técnica:**
+Guía de setup: credenciales, endpoints, variables en `local.properties` o `gradle.properties`.
+```
